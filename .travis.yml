@@ -1,6 +1,6 @@
 env:
   global:
-    - secure: 6GJFbN62dQxgdMDUCy92Wc3xHaepp3D5/AwOfKM2tfik454AeZgoymGfXD/Om9WZXcwe1ji3szzCRNqwNKTeMgxBvjof4CdoybspEzjgHo5+XpkS7nHtlD3af9HL7NDKrep194B90YIkpoy/tML9wrlVSBMhrOX8dzNNnSSijmA=
+    - secure: hJyBS+4mqZlpi3+V0MI9TBaqIDC0W6Qjxa30Vi7sfh0gkjtSSfI2sCTl7bvbh83L6YMOr3iDfFJDfpKIdvC7uf0tbK5HsPwiUQGOo8vgvdKhnRfR1NQ+M/tqY6rll9nqR2P1XgQPYDfRLEFPhGnEceeYYG3peDHAAH7wPjgHFuYzfpR702r1Ok4HORLL8apUoN7RUDNsHNqY2L1JwDdBrfjiDoEybRY7HCrR96pZCJmvq6Xb7aETOtLxCa1mdZw2OLnIil7krr0YVlVo9a4mHmlOarrtRDR8x/c3qyMe8vtmQRtWWV3KREb6bHe8gSmBO5bptBf6tO3/mUevr5LRPlhXqB5ICUjtFEBhyKUh7nxVpQq6kalY0p5UvEGSeOQ1XsPCZJRU1sBmZ4HgB8XUr2kM3hsvQ8GuHIbmZEeg/zS6O/R/cbipaF8e5a9gMXv2VhySTfiCv4TmRXik8ZCeqHqctMErqm4JmbG/3Z2MIU1z9h79tpKWC7FuCVkylQvB+p1NJrqvvmABhtHkQ0s9hWolTh7RjLImfBCBG5TpO34wgqszjl+MNnXel5oh2Tleq0WEJK7VjPwNOopOcXI6zspMqwMdz0beDL/+4UTdGn270p2S0L8KKBEncix1lDNL3RGY/qSL6L/cc2F2ufshigkaO6n6okLgO347Z0QUupU=
 os:
   - linux
   - osx
@@ -13,3 +13,13 @@ sudo: false
 branches:
   only:
     - master
+cache:
+  directories:
+    - $HOME/elfutils
+script:
+  - curl -sSL https://github.com/maidsafe/QA/raw/master/Bash%20Scripts/Travis/build_and_run_tests.sh | bash
+before_cache:
+  - curl -sSLO https://github.com/maidsafe/QA/raw/master/Bash%20Scripts/Travis/install_elfutils.sh
+  - . install_elfutils.sh
+after_success:
+  - curl -sSL https://github.com/maidsafe/QA/raw/master/Bash%20Scripts/Travis/after_success.sh | bash
