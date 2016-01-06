@@ -12,7 +12,7 @@ homepage = "http://maidsafe.net"
 [dependencies]
 rustc-serialize = "~0.3.16"
 rand = "~0.3.12"
-maidsafe_utilities = "~0.1.4"
+maidsafe_utilities = "~0.1.5"
 
 [dev-dependencies]
 cbor = "~0.3.16"
