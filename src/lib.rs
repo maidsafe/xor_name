@@ -21,11 +21,12 @@ extern crate rand;
 #[macro_use]
 extern crate maidsafe_utilities;
 
-use std::hash;
 use rustc_serialize::{Decodable, Decoder, Encodable, Encoder};
 use rustc_serialize::hex::{ToHex, FromHex, FromHexError};
-use std::cmp::*;
+use std::cmp::Ordering;
 use std::fmt;
+use std::hash;
+use std::ops;
 
 pub fn slice_as_u8_64_array(slice: &[u8]) -> [u8; 64] {
     assert!(slice.len() == 64);
@@ -37,8 +38,11 @@ pub fn slice_as_u8_64_array(slice: &[u8]) -> [u8; 64] {
     arr
 }
 
-/// Constant byte length of XorName.
+/// Constant byte length of `XorName`.
 pub const XOR_NAME_LEN: usize = 64;
+
+/// Constant bit length of `XorName`.
+pub const XOR_NAME_BITS: usize = XOR_NAME_LEN * 8;
 
 /// Returns true if both slices are equal in length and have equal contents.
 pub fn slice_equal<T: PartialEq>(lhs: &[T], rhs: &[T]) -> bool {
@@ -53,13 +57,21 @@ pub enum XorNameFromHexError {
     InvalidLength,
 }
 
-/// XorName can be created using the new function by passing ID as its parameter.
+/// A [`XOR_NAME_BITS`](constant.XOR_NAME_BITS.html)-bit number, viewed as a point in XOR space.
+///
+/// This has as its only field an array of [`XOR_NAME_LEN`](constant.XOR_NAME_LEN.html) bytes,
+/// i. e. a number between 0 and 2<sup>XOR_NAME_BITS</sup> - 1, the `XorName`'s "ID".
+///
+/// XOR space is the space of these numbers, with the [XOR metric][1] as a notion of distance,
+/// i. e. the points with IDs `x` and `y` are considered to have distance `x xor y`.
+///
+/// [1]: https://en.wikipedia.org/wiki/Kademlia#System_details
 #[derive(Eq, Copy)]
 pub struct XorName(pub [u8; XOR_NAME_LEN]);
 
 #[allow(unused)]
 impl XorName {
-    /// Construct a XorName from a XOR_NAME_LEN byte array.
+    /// Construct a XorName from a `XOR_NAME_LEN` byte array.
     pub fn new(id: [u8; XOR_NAME_LEN]) -> XorName {
         XorName(id)
     }
@@ -74,25 +86,45 @@ impl XorName {
         self.0.to_hex()
     }
 
-    /// This is equivalent to the common leading bits of `self.id.0` and `name` where "leading
-    /// bits" means the most significant bits.
+    /// **Deprecated**
+    ///
+    /// Currently identical to `bucket_index`. This method will be replaced with
+    /// `XOR_NAME_BITS - bucket_index` or removed entirely.
     pub fn bucket_distance(&self, name: &XorName) -> usize {
-        for byte_index in 0..::XOR_NAME_LEN {
+        self.bucket_index(name)
+    }
+
+    /// Returns the number of leading bits in which `self` and `name` agree.
+    ///
+    /// Here, "leading bits" means the most significant bits. E. g. for `10101...` and `10011...`,
+    /// that value will be 2, as their common prefix `10` has length 2 and the third bit is the
+    /// first one in which they disagree.
+    ///
+    /// Equivalently, this is `XOR_NAME_BITS - bucket_distance`, where `bucket_distance` is the
+    /// length of the remainders after the common prefix is removed from the IDs of `self` and
+    /// `name`.
+    ///
+    /// The bucket distance is the magnitude of the XOR distance. More precisely, if `d > 0` is the
+    /// XOR distance between `self` and `name`, the bucket distance equals `floor(log2(d))`, i. e.
+    /// a bucket distance of `n` means that 2<sup>`n - 1`</sup> `<= d <` 2<sup>`n`</sup>.
+    pub fn bucket_index(&self, name: &XorName) -> usize {
+        for byte_index in 0..XOR_NAME_LEN {
             if self.0[byte_index] != name.0[byte_index] {
-                return (byte_index * 8) + match self.0[byte_index] ^ name.0[byte_index] {
-                    1 => 7,
-                    2 | 3 => 6,
-                    4...7 => 5,
-                    8...15 => 4,
-                    16...31 => 3,
-                    32...63 => 2,
-                    64...127 => 1,
-                    128...255 => 0,
-                    _ => unreachable!(),
-                }
+                return (byte_index * 8)
+                    + (self.0[byte_index] ^ name.0[byte_index]).leading_zeros() as usize
             }
         }
-        ::XOR_NAME_LEN * 8
+        XOR_NAME_BITS
+    }
+
+    /// Compares `lhs` and `rhs` with respect to their distance from `self`.
+    pub fn cmp_closeness(&self, lhs: &XorName, rhs: &XorName) -> Ordering {
+        for i in 0..XOR_NAME_LEN {
+            if lhs.0[i] != rhs.0[i] {
+                return Ord::cmp(&(lhs.0[i] ^ self.0[i]), &(rhs.0[i] ^ self.0[i]))
+            }
+        }
+        Ordering::Equal
     }
 
     /// Hex-decode a `XorName` from a `&str`.
@@ -151,37 +183,27 @@ impl rand::Rand for XorName {
     }
 }
 
-/// Returns true if `lhs` is closer to `target` than `rhs`.  "Closer" here is as per the Kademlia
-/// notion of XOR distance, i.e. the distance between two `XorName`s is the bitwise XOR of their
-/// values.
+/// Returns true if `lhs` is closer to `target` than `rhs`.
+///
+/// "Closer" here is as per the Kademlia notion of XOR distance, i.e. the distance between two
+/// `XorName`s is the bitwise XOR of their values.
+///
+/// Equivalently, this returns `true` if in the most significant bit where `lhs` and `rhs`
+/// disagree, `lhs` agrees with `target`.
 pub fn closer_to_target(lhs: &XorName, rhs: &XorName, target: &XorName) -> bool {
-    for i in 0..lhs.0.len() {
-        let res_0 = lhs.0[i] ^ target.0[i];
-        let res_1 = rhs.0[i] ^ target.0[i];
-
-        if res_0 != res_1 {
-            return res_0 < res_1;
-        }
-    }
-    false
+    target.cmp_closeness(lhs, rhs) == Ordering::Less
 }
 
 /// Returns true if `lhs` is closer to `target` than `rhs`, or when `lhs == rhs`.
-/// "Closer" here is as per the Kademlia notion of XOR distance,
-/// i.e. the distance between two `XorName`s is the bitwise XOR of their values.
+///
+/// "Closer" here is as per the Kademlia notion of XOR distance, i.e. the distance between two
+/// `XorName`s is the bitwise XOR of their values.
 pub fn closer_to_target_or_equal(lhs: &XorName, rhs: &XorName, target: &XorName) -> bool {
-    for i in 0..lhs.0.len() {
-        let res_0 = lhs.0[i] ^ target.0[i];
-        let res_1 = rhs.0[i] ^ target.0[i];
-
-        if res_0 != res_1 {
-            return res_0 < res_1;
-        }
-    }
-    true
+    target.cmp_closeness(lhs, rhs) != Ordering::Greater
 }
 
-/// The `XorName` can be ordered from zero as a normal Euclidean number
+/// The `XorName`s can be ordered from zero as an integer. This is equivalent to ordering them by
+/// their distance from the name `0`.
 impl Ord for XorName {
     #[inline]
     fn cmp(&self, other: &XorName) -> Ordering {
@@ -231,30 +253,30 @@ impl Clone for XorName {
     }
 }
 
-impl ::std::ops::Index<::std::ops::Range<usize>> for XorName {
+impl ops::Index<ops::Range<usize>> for XorName {
     type Output = [u8];
-    fn index(&self, _index: ::std::ops::Range<usize>) -> &[u8] {
+    fn index(&self, _index: ops::Range<usize>) -> &[u8] {
         let &XorName(ref b) = self;
         b.index(_index)
     }
 }
-impl ::std::ops::Index<::std::ops::RangeTo<usize>> for XorName {
+impl ops::Index<ops::RangeTo<usize>> for XorName {
     type Output = [u8];
-    fn index(&self, _index: ::std::ops::RangeTo<usize>) -> &[u8] {
+    fn index(&self, _index: ops::RangeTo<usize>) -> &[u8] {
         let &XorName(ref b) = self;
         b.index(_index)
     }
 }
-impl ::std::ops::Index<::std::ops::RangeFrom<usize>> for XorName {
+impl ops::Index<ops::RangeFrom<usize>> for XorName {
     type Output = [u8];
-    fn index(&self, _index: ::std::ops::RangeFrom<usize>) -> &[u8] {
+    fn index(&self, _index: ops::RangeFrom<usize>) -> &[u8] {
         let &XorName(ref b) = self;
         b.index(_index)
     }
 }
-impl ::std::ops::Index<::std::ops::RangeFull> for XorName {
+impl ops::Index<ops::RangeFull> for XorName {
     type Output = [u8];
-    fn index(&self, _index: ::std::ops::RangeFull) -> &[u8] {
+    fn index(&self, _index: ops::RangeFull) -> &[u8] {
         let &XorName(ref b) = self;
         b.index(_index)
     }
