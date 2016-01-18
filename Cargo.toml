@@ -1,6 +1,6 @@
 [package]
 name = "xor_name"
-version = "0.0.1"
+version = "0.0.2"
 authors = ["MaidSafe Developers <dev@maidsafe.net>"]
 description = "Type with xor methods"
 documentation = "http://maidsafe.net/xor_name/latest"
