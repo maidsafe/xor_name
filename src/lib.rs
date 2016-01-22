@@ -30,7 +30,7 @@ use std::ops;
 
 pub fn slice_as_u8_64_array(slice: &[u8]) -> [u8; 64] {
     assert!(slice.len() == 64);
-    let mut arr = [0u8;64];
+    let mut arr = [0u8; 64];
     // TODO (canndrew): This should use copy_memory when it's stable
     for i in 0..64 {
         arr[i] = slice[i];
@@ -110,8 +110,8 @@ impl XorName {
     pub fn bucket_index(&self, name: &XorName) -> usize {
         for byte_index in 0..XOR_NAME_LEN {
             if self.0[byte_index] != name.0[byte_index] {
-                return (byte_index * 8)
-                    + (self.0[byte_index] ^ name.0[byte_index]).leading_zeros() as usize
+                return (byte_index * 8) +
+                       (self.0[byte_index] ^ name.0[byte_index]).leading_zeros() as usize;
             }
         }
         XOR_NAME_BITS
@@ -121,7 +121,7 @@ impl XorName {
     pub fn cmp_closeness(&self, lhs: &XorName, rhs: &XorName) -> Ordering {
         for i in 0..XOR_NAME_LEN {
             if lhs.0[i] != rhs.0[i] {
-                return Ord::cmp(&(lhs.0[i] ^ self.0[i]), &(rhs.0[i] ^ self.0[i]))
+                return Ord::cmp(&(lhs.0[i] ^ self.0[i]), &(rhs.0[i] ^ self.0[i]));
             }
         }
         Ordering::Equal
@@ -131,8 +131,9 @@ impl XorName {
     pub fn from_hex(s: &str) -> Result<XorName, XorNameFromHexError> {
         let data = match s.from_hex() {
             Ok(v) => v,
-            Err(FromHexError::InvalidHexCharacter(c, p)) =>
-                return Err(XorNameFromHexError::InvalidCharacter(c, p)),
+            Err(FromHexError::InvalidHexCharacter(c, p)) => {
+                return Err(XorNameFromHexError::InvalidCharacter(c, p))
+            }
             Err(FromHexError::InvalidHexLength) => return Err(XorNameFromHexError::InvalidLength),
         };
         if data.len() != XOR_NAME_LEN {
@@ -255,30 +256,30 @@ impl Clone for XorName {
 
 impl ops::Index<ops::Range<usize>> for XorName {
     type Output = [u8];
-    fn index(&self, _index: ops::Range<usize>) -> &[u8] {
+    fn index(&self, index: ops::Range<usize>) -> &[u8] {
         let &XorName(ref b) = self;
-        b.index(_index)
+        b.index(index)
     }
 }
 impl ops::Index<ops::RangeTo<usize>> for XorName {
     type Output = [u8];
-    fn index(&self, _index: ops::RangeTo<usize>) -> &[u8] {
+    fn index(&self, index: ops::RangeTo<usize>) -> &[u8] {
         let &XorName(ref b) = self;
-        b.index(_index)
+        b.index(index)
     }
 }
 impl ops::Index<ops::RangeFrom<usize>> for XorName {
     type Output = [u8];
-    fn index(&self, _index: ops::RangeFrom<usize>) -> &[u8] {
+    fn index(&self, index: ops::RangeFrom<usize>) -> &[u8] {
         let &XorName(ref b) = self;
-        b.index(_index)
+        b.index(index)
     }
 }
 impl ops::Index<ops::RangeFull> for XorName {
     type Output = [u8];
-    fn index(&self, _index: ops::RangeFull) -> &[u8] {
+    fn index(&self, index: ops::RangeFull) -> &[u8] {
         let &XorName(ref b) = self;
-        b.index(_index)
+        b.index(index)
     }
 }
 
