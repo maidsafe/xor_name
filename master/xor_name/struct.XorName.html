@@ -65,6 +65,10 @@ i. e. the points with IDs <code>x</code> and <code>y</code> are considered to ha
 
 <p>Currently identical to <code>bucket_index</code>. This method will be replaced with
 <code>XOR_NAME_BITS - bucket_index</code> or removed entirely.</p>
+</div><h4 id='method.cmp_closeness' class='method'><code>fn <a href='#method.cmp_closeness' class='fnname'>cmp_closeness</a>(&amp;self, lhs: &amp;<a class='struct' href='../xor_name/struct.XorName.html' title='xor_name::XorName'>XorName</a>, rhs: &amp;<a class='struct' href='../xor_name/struct.XorName.html' title='xor_name::XorName'>XorName</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/cmp/enum.Ordering.html' title='core::cmp::Ordering'>Ordering</a></code></h4>
+<div class='docblock'><p><strong>Deprecated</strong></p>
+
+<p>Use the equivalent <code>cmp_distance</code> instead.</p>
 </div><h4 id='method.bucket_index' class='method'><code>fn <a href='#method.bucket_index' class='fnname'>bucket_index</a>(&amp;self, name: &amp;<a class='struct' href='../xor_name/struct.XorName.html' title='xor_name::XorName'>XorName</a>) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a></code></h4>
 <div class='docblock'><p>Returns the number of leading bits in which <code>self</code> and <code>name</code> agree.</p>
 
@@ -79,7 +83,7 @@ length of the remainders after the common prefix is removed from the IDs of <cod
 <p>The bucket distance is the magnitude of the XOR distance. More precisely, if <code>d &gt; 0</code> is the
 XOR distance between <code>self</code> and <code>name</code>, the bucket distance equals <code>floor(log2(d))</code>, i. e.
 a bucket distance of <code>n</code> means that 2<sup><code>n - 1</code></sup> <code>&lt;= d &lt;</code> 2<sup><code>n</code></sup>.</p>
-</div><h4 id='method.cmp_closeness' class='method'><code>fn <a href='#method.cmp_closeness' class='fnname'>cmp_closeness</a>(&amp;self, lhs: &amp;<a class='struct' href='../xor_name/struct.XorName.html' title='xor_name::XorName'>XorName</a>, rhs: &amp;<a class='struct' href='../xor_name/struct.XorName.html' title='xor_name::XorName'>XorName</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/cmp/enum.Ordering.html' title='core::cmp::Ordering'>Ordering</a></code></h4>
+</div><h4 id='method.cmp_distance' class='method'><code>fn <a href='#method.cmp_distance' class='fnname'>cmp_distance</a>(&amp;self, lhs: &amp;<a class='struct' href='../xor_name/struct.XorName.html' title='xor_name::XorName'>XorName</a>, rhs: &amp;<a class='struct' href='../xor_name/struct.XorName.html' title='xor_name::XorName'>XorName</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/cmp/enum.Ordering.html' title='core::cmp::Ordering'>Ordering</a></code></h4>
 <div class='docblock'><p>Compares <code>lhs</code> and <code>rhs</code> with respect to their distance from <code>self</code>.</p>
 </div><h4 id='method.from_hex' class='method'><code>fn <a href='#method.from_hex' class='fnname'>from_hex</a>(s: &amp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='struct' href='../xor_name/struct.XorName.html' title='xor_name::XorName'>XorName</a>, <a class='enum' href='../xor_name/enum.XorNameFromHexError.html' title='xor_name::XorNameFromHexError'>XorNameFromHexError</a>&gt;</code></h4>
 <div class='docblock'><p>Hex-decode a <code>XorName</code> from a <code>&amp;str</code>.</p>
