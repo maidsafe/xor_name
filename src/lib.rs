@@ -94,6 +94,13 @@ impl XorName {
         self.bucket_index(name)
     }
 
+    /// **Deprecated**
+    ///
+    /// Use the equivalent `cmp_distance` instead.
+    pub fn cmp_closeness(&self, lhs: &XorName, rhs: &XorName) -> Ordering {
+        self.cmp_distance(lhs, rhs)
+    }
+
     /// Returns the number of leading bits in which `self` and `name` agree.
     ///
     /// Here, "leading bits" means the most significant bits. E. g. for `10101...` and `10011...`,
@@ -118,7 +125,7 @@ impl XorName {
     }
 
     /// Compares `lhs` and `rhs` with respect to their distance from `self`.
-    pub fn cmp_closeness(&self, lhs: &XorName, rhs: &XorName) -> Ordering {
+    pub fn cmp_distance(&self, lhs: &XorName, rhs: &XorName) -> Ordering {
         for i in 0..XOR_NAME_LEN {
             if lhs.0[i] != rhs.0[i] {
                 return Ord::cmp(&(lhs.0[i] ^ self.0[i]), &(rhs.0[i] ^ self.0[i]));
