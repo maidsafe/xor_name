@@ -162,19 +162,19 @@ impl XorName {
 }
 
 
-impl fmt::Debug for XorName {
+pub impl fmt::Debug for XorName {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", self.get_debug_id())
     }
 }
 
-impl fmt::Display for XorName {
+pub impl fmt::Display for XorName {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", self.get_debug_id())
     }
 }
 
-impl PartialEq for XorName {
+pub impl PartialEq for XorName {
     fn eq(&self, other: &XorName) -> bool {
         slice_equal(&self.0, &other.0)
     }
