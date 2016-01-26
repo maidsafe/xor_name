@@ -124,6 +124,13 @@ impl XorName {
         XOR_NAME_BITS
     }
 
+    /// Returns a copy of `self`, with the `i`-th bit flipped.
+    pub fn with_flipped_bit(&self, index: usize) -> XorName {
+        let &XorName(mut bytes) = self;
+        bytes[index / 8] = bytes[index / 8] ^ (1 << (7 - index % 8));
+        XorName(bytes)
+    }
+
     /// Compares `lhs` and `rhs` with respect to their distance from `self`.
     pub fn cmp_distance(&self, lhs: &XorName, rhs: &XorName) -> Ordering {
         for i in 0..XOR_NAME_LEN {
@@ -388,5 +395,16 @@ mod test {
         assert_eq!(&debug_id[8..14],
                    &full_id[2 * XOR_NAME_LEN - 6..2 * XOR_NAME_LEN]);
         assert_eq!(&debug_id[6..8], "..");
+    }
+
+    #[test]
+    fn with_flipped_bit() {
+        let name: XorName = rand::random();
+        for i in 0..18 {
+            assert_eq!(i, name.bucket_index(&name.with_flipped_bit(i)));
+        }
+        for i in 0..10 {
+            assert_eq!(49 * i, name.bucket_index(&name.with_flipped_bit(49 * i)));
+        }
     }
 }
