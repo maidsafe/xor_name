@@ -28,6 +28,7 @@ use std::fmt;
 use std::hash;
 use std::ops;
 
+
 pub fn slice_as_u8_64_array(slice: &[u8]) -> [u8; 64] {
     assert!(slice.len() == 64);
     let mut arr = [0u8; 64];
@@ -50,12 +51,18 @@ pub fn slice_equal<T: PartialEq>(lhs: &[T], rhs: &[T]) -> bool {
 }
 
 /// Errors that can occur when decoding a `XorName` from a string.
+#[derive(Debug)]
 pub enum XorNameFromHexError {
     /// The given invalid hex character occurred at the given position.
     InvalidCharacter(char, usize),
     /// The hex string did not encode `XOR_NAME_LEN` bytes.
     InvalidLength,
 }
+
+/// A bit was indexed by a value `i` that did not satisfy `0 <= i < XOR_NAME_BITS`.
+#[derive(Debug)]
+pub struct BitIndexOutOfBoundsError;
+
 
 /// A [`XOR_NAME_BITS`](constant.XOR_NAME_BITS.html)-bit number, viewed as a point in XOR space.
 ///
@@ -124,11 +131,17 @@ impl XorName {
         XOR_NAME_BITS
     }
 
-    /// Returns a copy of `self`, with the `i`-th bit flipped.
-    pub fn with_flipped_bit(&self, index: usize) -> XorName {
+    /// Returns a copy of `self`, with the `index`-th bit flipped.
+    ///
+    /// If the parameter does not address one of the name's bits, i. e. if it does not satisfy
+    /// `index < XOR_NAME_BITS`, the result will be an error.
+    pub fn with_flipped_bit(&self, index: usize) -> Result<XorName, BitIndexOutOfBoundsError> {
+        if index >= XOR_NAME_BITS {
+            return Err(BitIndexOutOfBoundsError);
+        }
         let &XorName(mut bytes) = self;
         bytes[index / 8] = bytes[index / 8] ^ (1 << (7 - index % 8));
-        XorName(bytes)
+        Ok(XorName(bytes))
     }
 
     /// Compares `lhs` and `rhs` with respect to their distance from `self`.
@@ -401,10 +414,12 @@ mod test {
     fn with_flipped_bit() {
         let name: XorName = rand::random();
         for i in 0..18 {
-            assert_eq!(i, name.bucket_index(&name.with_flipped_bit(i)));
+            assert_eq!(i, name.bucket_index(&unwrap_result!(name.with_flipped_bit(i))));
         }
         for i in 0..10 {
-            assert_eq!(49 * i, name.bucket_index(&name.with_flipped_bit(49 * i)));
+            assert_eq!(49 * i, name.bucket_index(&unwrap_result!(name.with_flipped_bit(49 * i))));
         }
+        assert!(name.with_flipped_bit(XOR_NAME_BITS).is_err());
+        assert!(name.with_flipped_bit(XOR_NAME_BITS + 1000).is_err());
     }
 }
