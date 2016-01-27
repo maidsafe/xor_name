@@ -28,6 +28,7 @@ use std::fmt;
 use std::hash;
 use std::ops;
 
+
 pub fn slice_as_u8_64_array(slice: &[u8]) -> [u8; 64] {
     assert!(slice.len() == 64);
     let mut arr = [0u8; 64];
@@ -50,12 +51,18 @@ pub fn slice_equal<T: PartialEq>(lhs: &[T], rhs: &[T]) -> bool {
 }
 
 /// Errors that can occur when decoding a `XorName` from a string.
+#[derive(Debug)]
 pub enum XorNameFromHexError {
     /// The given invalid hex character occurred at the given position.
     InvalidCharacter(char, usize),
     /// The hex string did not encode `XOR_NAME_LEN` bytes.
     InvalidLength,
 }
+
+/// A bit was indexed by a value `i` that did not satisfy `0 <= i < XOR_NAME_BITS`.
+#[derive(Debug)]
+pub struct BitIndexOutOfBoundsError;
+
 
 /// A [`XOR_NAME_BITS`](constant.XOR_NAME_BITS.html)-bit number, viewed as a point in XOR space.
 ///
@@ -122,6 +129,24 @@ impl XorName {
             }
         }
         XOR_NAME_BITS
+    }
+
+    /// Returns a copy of `self`, with the `index`-th bit flipped.
+    ///
+    /// If the parameter does not address one of the name's bits, i. e. if it does not satisfy
+    /// `index < XOR_NAME_BITS`, the result will be an error.
+    pub fn with_flipped_bit(&self, index: usize) -> Result<XorName, BitIndexOutOfBoundsError> {
+        if index >= XOR_NAME_BITS {
+            return Err(BitIndexOutOfBoundsError);
+        }
+        let &XorName(mut bytes) = self;
+        bytes[index / 8] = bytes[index / 8] ^ (1 << (7 - index % 8));
+        Ok(XorName(bytes))
+    }
+
+    /// Returns the number of bits in which `self` differs from `other`.
+    pub fn count_differing_bits(&self, other: &XorName) -> u32 {
+        self.0.iter().zip(other.0.iter()).fold(0, |acc, (a, b)| acc + (a ^ b).count_ones())
     }
 
     /// Compares `lhs` and `rhs` with respect to their distance from `self`.
@@ -388,5 +413,28 @@ mod test {
         assert_eq!(&debug_id[8..14],
                    &full_id[2 * XOR_NAME_LEN - 6..2 * XOR_NAME_LEN]);
         assert_eq!(&debug_id[6..8], "..");
+    }
+
+    #[test]
+    fn with_flipped_bit() {
+        let name: XorName = rand::random();
+        for i in 0..18 {
+            assert_eq!(i, name.bucket_index(&unwrap_result!(name.with_flipped_bit(i))));
+        }
+        for i in 0..10 {
+            assert_eq!(49 * i, name.bucket_index(&unwrap_result!(name.with_flipped_bit(49 * i))));
+        }
+        assert!(name.with_flipped_bit(XOR_NAME_BITS).is_err());
+        assert!(name.with_flipped_bit(XOR_NAME_BITS + 1000).is_err());
+    }
+
+    #[test]
+    fn count_differing_bits() {
+        let name: XorName = rand::random();
+        assert_eq!(0, name.count_differing_bits(&name));
+        let one_bit = unwrap_result!(name.with_flipped_bit(5));
+        assert_eq!(1, name.count_differing_bits(&one_bit));
+        let two_bits = unwrap_result!(one_bit.with_flipped_bit(100));
+        assert_eq!(2, name.count_differing_bits(&two_bits));
     }
 }
