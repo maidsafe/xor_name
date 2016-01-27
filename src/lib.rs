@@ -144,6 +144,11 @@ impl XorName {
         Ok(XorName(bytes))
     }
 
+    /// Returns the number of bits in which `self` differs from `other`.
+    pub fn count_differing_bits(&self, other: &XorName) -> u32 {
+        self.0.iter().zip(other.0.iter()).map(|acc, (a, b)| acc + (a ^ b).count_ones())
+    }
+
     /// Compares `lhs` and `rhs` with respect to their distance from `self`.
     pub fn cmp_distance(&self, lhs: &XorName, rhs: &XorName) -> Ordering {
         for i in 0..XOR_NAME_LEN {
@@ -421,5 +426,15 @@ mod test {
         }
         assert!(name.with_flipped_bit(XOR_NAME_BITS).is_err());
         assert!(name.with_flipped_bit(XOR_NAME_BITS + 1000).is_err());
+    }
+
+    #[test]
+    fn count_differing_bits() {
+        let name: XorName = rand::random();
+        assert_eq!(0, name.count_differing_bits(&name));
+        let one_bit = unwrap_result!(name.with_flipped_bit(5));
+        assert_eq!(1, name.count_differing_bits(&one_bit));
+        let two_bits = unwrap_result!(one_bit.with_flipped_bit(100));
+        assert_eq!(2, name.count_differing_bits(&two_bits));
     }
 }
