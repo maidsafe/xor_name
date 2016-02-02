@@ -45,11 +45,6 @@ pub const XOR_NAME_LEN: usize = 64;
 /// Constant bit length of `XorName`.
 pub const XOR_NAME_BITS: usize = XOR_NAME_LEN * 8;
 
-/// Returns true if both slices are equal in length and have equal contents.
-pub fn slice_equal<T: PartialEq>(lhs: &[T], rhs: &[T]) -> bool {
-    lhs.len() == rhs.len() && lhs.iter().zip(rhs.iter()).all(|(a, b)| a == b)
-}
-
 /// Errors that can occur when decoding a `XorName` from a string.
 #[derive(Debug)]
 pub enum XorNameFromHexError {
@@ -201,7 +196,7 @@ impl fmt::Display for XorName {
 
 impl PartialEq for XorName {
     fn eq(&self, other: &XorName) -> bool {
-        slice_equal(&self.0, &other.0)
+        &self.0[..] == &other.0[..]
     }
 }
 
