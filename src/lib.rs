@@ -235,30 +235,14 @@ pub fn closer_to_target_or_equal(lhs: &XorName, rhs: &XorName, target: &XorName)
 impl Ord for XorName {
     #[inline]
     fn cmp(&self, other: &XorName) -> Ordering {
-        Ord::cmp(&&self.0[..], &&other.0[..])
+        Ord::cmp(&self.0[..], &other.0[..])
     }
 }
 
 impl PartialOrd for XorName {
     #[inline]
     fn partial_cmp(&self, other: &XorName) -> Option<Ordering> {
-        PartialOrd::partial_cmp(&&self.0[..], &&other.0[..])
-    }
-    #[inline]
-    fn lt(&self, other: &XorName) -> bool {
-        PartialOrd::lt(&&self.0[..], &&other.0[..])
-    }
-    #[inline]
-    fn le(&self, other: &XorName) -> bool {
-        PartialOrd::le(&&self.0[..], &&other.0[..])
-    }
-    #[inline]
-    fn gt(&self, other: &XorName) -> bool {
-        PartialOrd::gt(&&self.0[..], &&other.0[..])
-    }
-    #[inline]
-    fn ge(&self, other: &XorName) -> bool {
-        PartialOrd::ge(&&self.0[..], &&other.0[..])
+        PartialOrd::partial_cmp(&self.0[..], &other.0[..])
     }
 }
 
@@ -269,15 +253,9 @@ impl hash::Hash for XorName {
 }
 
 impl Clone for XorName {
+    #[inline]
     fn clone(&self) -> Self {
-        let mut arr_cloned = [0u8; XOR_NAME_LEN];
-        let &XorName(arr_self) = self;
-
-        for i in 0..arr_self.len() {
-            arr_cloned[i] = arr_self[i];
-        }
-
-        XorName(arr_cloned)
+        *self
     }
 }
 
@@ -345,6 +323,7 @@ impl Decodable for XorName {
 #[cfg(test)]
 mod test {
     extern crate cbor;
+    use std::cmp::Ordering;
     use super::*;
     use rand;
 
@@ -357,6 +336,25 @@ mod test {
         let mut d = cbor::Decoder::from_bytes(e.as_bytes());
         let obj_after: XorName = unwrap_result!(unwrap_option!(d.decode().next(), ""));
         assert_eq!(obj_before, obj_after);
+    }
+
+    #[test]
+    fn xor_name_ord() {
+        let type1: XorName = XorName::new([1u8; XOR_NAME_LEN]);
+        let type2: XorName = XorName::new([2u8; XOR_NAME_LEN]);
+        assert!(Ord::cmp(&type1, &type1) == Ordering::Equal);
+        assert!(Ord::cmp(&type1, &type2) == Ordering::Less);
+        assert!(Ord::cmp(&type2, &type1) == Ordering::Greater);
+        assert!(type1 < type2);
+        assert!(type1 <= type2);
+        assert!(type1 <= type1);
+        assert!(type2 > type1);
+        assert!(type2 >= type1);
+        assert!(type1 >= type1);
+        assert!(!(type2 < type1));
+        assert!(!(type2 <= type1));
+        assert!(!(type1 > type2));
+        assert!(!(type1 >= type2));
     }
 
     #[test]
