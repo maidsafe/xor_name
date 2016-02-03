@@ -269,15 +269,9 @@ impl hash::Hash for XorName {
 }
 
 impl Clone for XorName {
+    #[inline]
     fn clone(&self) -> Self {
-        let mut arr_cloned = [0u8; XOR_NAME_LEN];
-        let &XorName(arr_self) = self;
-
-        for i in 0..arr_self.len() {
-            arr_cloned[i] = arr_self[i];
-        }
-
-        XorName(arr_cloned)
+        *self
     }
 }
 
