@@ -42,6 +42,8 @@
 #![cfg_attr(feature="clippy", plugin(clippy))]
 #![cfg_attr(feature="clippy", deny(clippy, clippy_pedantic))]
 
+#![allow(unused_extern_crates)] #[macro_use]
+extern crate maidsafe_utilities;
 extern crate rustc_serialize;
 extern crate rand;
 
