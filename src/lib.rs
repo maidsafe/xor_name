@@ -198,13 +198,7 @@ impl XorName {
 
     // Private function exposed in fmt Debug {:?} and Display {} traits.
     fn get_debug_id(&self) -> String {
-        format!("{:02x}{:02x}{:02x}..{:02x}{:02x}{:02x}",
-                self.0[0],
-                self.0[1],
-                self.0[2],
-                self.0[XOR_NAME_LEN - 3],
-                self.0[XOR_NAME_LEN - 2],
-                self.0[XOR_NAME_LEN - 1])
+        format!("{:02X}{:02X}\u{2026}", self.0[0], self.0[1])
     }
 }
 
@@ -411,12 +405,9 @@ mod test {
             let my_name: XorName = rand::random();
             let debug_id = my_name.get_debug_id();
             let full_id = my_name.as_hex();
-            assert_eq!(debug_id.len(), 14);
+            assert_eq!(debug_id.len(), 7);
             assert_eq!(full_id.len(), 2 * XOR_NAME_LEN);
-            assert_eq!(&debug_id[0..6], &full_id[0..6]);
-            assert_eq!(&debug_id[8..14],
-                       &full_id[2 * XOR_NAME_LEN - 6..2 * XOR_NAME_LEN]);
-            assert_eq!(&debug_id[6..8], "..");
+            assert_eq!(&debug_id[0..4].to_owned(), &full_id[0..4].to_uppercase());
         }
     }
 
@@ -427,12 +418,9 @@ mod test {
         let my_low_char_name = XorName::new(low_char_id);
         let debug_id = my_low_char_name.get_debug_id();
         let full_id = my_low_char_name.as_hex();
-        assert_eq!(debug_id.len(), 14);
+        assert_eq!(debug_id.len(), 7);
         assert_eq!(full_id.len(), 2 * XOR_NAME_LEN);
-        assert_eq!(&debug_id[0..6], &full_id[0..6]);
-        assert_eq!(&debug_id[8..14],
-                   &full_id[2 * XOR_NAME_LEN - 6..2 * XOR_NAME_LEN]);
-        assert_eq!(&debug_id[6..8], "..");
+        assert_eq!(&debug_id[0..4].to_uppercase(), &full_id[0..4].to_owned());
     }
 
     #[test]
