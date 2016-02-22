@@ -1,5 +1,8 @@
 # XorName - Change Log
 
+## [0.0.4]
+- Reduce debug output to improve readability.
+
 ## [0.0.3]
 - Add the `with_flipped_bit` and `count_differing_bits` methods.
 - Rename `cmp_closeness` to `cmp_distance`.
