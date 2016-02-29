@@ -10,10 +10,10 @@ license = "GPL-3.0"
 homepage = "http://maidsafe.net"
 
 [dependencies]
-clippy = {version = "~0.0.37", optional = true}
-maidsafe_utilities = "~0.1.5"
-rand = "~0.3.12"
-rustc-serialize = "~0.3.16"
+clippy = {version = "~0.0.44", optional = true}
+maidsafe_utilities = "~0.2.1"
+rand = "~0.3.14"
+rustc-serialize = "~0.3.18"
 
 [dev-dependencies]
 cbor = "~0.3.16"

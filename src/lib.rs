@@ -198,7 +198,7 @@ impl XorName {
 
     // Private function exposed in fmt Debug {:?} and Display {} traits.
     fn get_debug_id(&self) -> String {
-        format!("{:02X}{:02X}\u{2026}", self.0[0], self.0[1])
+        format!("{:02x}{:02x}..", self.0[0], self.0[1])
     }
 }
 
@@ -240,7 +240,7 @@ impl rand::Rand for XorName {
 /// Equivalently, this returns `true` if in the most significant bit where `lhs` and `rhs`
 /// disagree, `lhs` agrees with `target`.
 pub fn closer_to_target(lhs: &XorName, rhs: &XorName, target: &XorName) -> bool {
-    target.cmp_closeness(lhs, rhs) == Ordering::Less
+    target.cmp_distance(lhs, rhs) == Ordering::Less
 }
 
 /// Returns true if `lhs` is closer to `target` than `rhs`, or when `lhs == rhs`.
@@ -248,7 +248,7 @@ pub fn closer_to_target(lhs: &XorName, rhs: &XorName, target: &XorName) -> bool 
 /// "Closer" here is as per the Kademlia notion of XOR distance, i.e. the distance between two
 /// `XorName`s is the bitwise XOR of their values.
 pub fn closer_to_target_or_equal(lhs: &XorName, rhs: &XorName, target: &XorName) -> bool {
-    target.cmp_closeness(lhs, rhs) != Ordering::Greater
+    target.cmp_distance(lhs, rhs) != Ordering::Greater
 }
 
 /// The `XorName`s can be ordered from zero as an integer. This is equivalent to ordering them by
@@ -405,9 +405,9 @@ mod test {
             let my_name: XorName = rand::random();
             let debug_id = my_name.get_debug_id();
             let full_id = my_name.as_hex();
-            assert_eq!(debug_id.len(), 7);
+            assert_eq!(debug_id.len(), 6);
             assert_eq!(full_id.len(), 2 * XOR_NAME_LEN);
-            assert_eq!(&debug_id[0..4].to_owned(), &full_id[0..4].to_uppercase());
+            assert_eq!(&debug_id[0..4].to_owned(), &full_id[0..4]);
         }
     }
 
@@ -418,9 +418,9 @@ mod test {
         let my_low_char_name = XorName::new(low_char_id);
         let debug_id = my_low_char_name.get_debug_id();
         let full_id = my_low_char_name.as_hex();
-        assert_eq!(debug_id.len(), 7);
+        assert_eq!(debug_id.len(), 6);
         assert_eq!(full_id.len(), 2 * XOR_NAME_LEN);
-        assert_eq!(&debug_id[0..4].to_uppercase(), &full_id[0..4].to_owned());
+        assert_eq!(&debug_id[0..4], &full_id[0..4].to_owned());
     }
 
     #[test]
