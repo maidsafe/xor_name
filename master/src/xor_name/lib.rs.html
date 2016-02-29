@@ -690,7 +690,7 @@
 
     <span class='comment'>// Private function exposed in fmt Debug {:?} and Display {} traits.</span>
     <span class='kw'>fn</span> <span class='ident'>get_debug_id</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>String</span> {
-        <span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;{:02X}{:02X}\u{2026}&quot;</span>, <span class='self'>self</span>.<span class='number'>0</span>[<span class='number'>0</span>], <span class='self'>self</span>.<span class='number'>0</span>[<span class='number'>1</span>])
+        <span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;{:02x}{:02x}..&quot;</span>, <span class='self'>self</span>.<span class='number'>0</span>[<span class='number'>0</span>], <span class='self'>self</span>.<span class='number'>0</span>[<span class='number'>1</span>])
     }
 }
 
@@ -732,7 +732,7 @@
 <span class='doccomment'>/// Equivalently, this returns `true` if in the most significant bit where `lhs` and `rhs`</span>
 <span class='doccomment'>/// disagree, `lhs` agrees with `target`.</span>
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>closer_to_target</span>(<span class='ident'>lhs</span>: <span class='kw-2'>&amp;</span><span class='ident'>XorName</span>, <span class='ident'>rhs</span>: <span class='kw-2'>&amp;</span><span class='ident'>XorName</span>, <span class='ident'>target</span>: <span class='kw-2'>&amp;</span><span class='ident'>XorName</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
-    <span class='ident'>target</span>.<span class='ident'>cmp_closeness</span>(<span class='ident'>lhs</span>, <span class='ident'>rhs</span>) <span class='op'>==</span> <span class='ident'>Ordering</span>::<span class='ident'>Less</span>
+    <span class='ident'>target</span>.<span class='ident'>cmp_distance</span>(<span class='ident'>lhs</span>, <span class='ident'>rhs</span>) <span class='op'>==</span> <span class='ident'>Ordering</span>::<span class='ident'>Less</span>
 }
 
 <span class='doccomment'>/// Returns true if `lhs` is closer to `target` than `rhs`, or when `lhs == rhs`.</span>
@@ -740,7 +740,7 @@
 <span class='doccomment'>/// &quot;Closer&quot; here is as per the Kademlia notion of XOR distance, i.e. the distance between two</span>
 <span class='doccomment'>/// `XorName`s is the bitwise XOR of their values.</span>
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>closer_to_target_or_equal</span>(<span class='ident'>lhs</span>: <span class='kw-2'>&amp;</span><span class='ident'>XorName</span>, <span class='ident'>rhs</span>: <span class='kw-2'>&amp;</span><span class='ident'>XorName</span>, <span class='ident'>target</span>: <span class='kw-2'>&amp;</span><span class='ident'>XorName</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
-    <span class='ident'>target</span>.<span class='ident'>cmp_closeness</span>(<span class='ident'>lhs</span>, <span class='ident'>rhs</span>) <span class='op'>!=</span> <span class='ident'>Ordering</span>::<span class='ident'>Greater</span>
+    <span class='ident'>target</span>.<span class='ident'>cmp_distance</span>(<span class='ident'>lhs</span>, <span class='ident'>rhs</span>) <span class='op'>!=</span> <span class='ident'>Ordering</span>::<span class='ident'>Greater</span>
 }
 
 <span class='doccomment'>/// The `XorName`s can be ordered from zero as an integer. This is equivalent to ordering them by</span>
@@ -897,9 +897,9 @@
             <span class='kw'>let</span> <span class='ident'>my_name</span>: <span class='ident'>XorName</span> <span class='op'>=</span> <span class='ident'>rand</span>::<span class='ident'>random</span>();
             <span class='kw'>let</span> <span class='ident'>debug_id</span> <span class='op'>=</span> <span class='ident'>my_name</span>.<span class='ident'>get_debug_id</span>();
             <span class='kw'>let</span> <span class='ident'>full_id</span> <span class='op'>=</span> <span class='ident'>my_name</span>.<span class='ident'>as_hex</span>();
-            <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>debug_id</span>.<span class='ident'>len</span>(), <span class='number'>7</span>);
+            <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>debug_id</span>.<span class='ident'>len</span>(), <span class='number'>6</span>);
             <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>full_id</span>.<span class='ident'>len</span>(), <span class='number'>2</span> <span class='op'>*</span> <span class='ident'>XOR_NAME_LEN</span>);
-            <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='ident'>debug_id</span>[<span class='number'>0</span>..<span class='number'>4</span>].<span class='ident'>to_owned</span>(), <span class='kw-2'>&amp;</span><span class='ident'>full_id</span>[<span class='number'>0</span>..<span class='number'>4</span>].<span class='ident'>to_uppercase</span>());
+            <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='ident'>debug_id</span>[<span class='number'>0</span>..<span class='number'>4</span>].<span class='ident'>to_owned</span>(), <span class='kw-2'>&amp;</span><span class='ident'>full_id</span>[<span class='number'>0</span>..<span class='number'>4</span>]);
         }
     }
 
@@ -910,9 +910,9 @@
         <span class='kw'>let</span> <span class='ident'>my_low_char_name</span> <span class='op'>=</span> <span class='ident'>XorName</span>::<span class='ident'>new</span>(<span class='ident'>low_char_id</span>);
         <span class='kw'>let</span> <span class='ident'>debug_id</span> <span class='op'>=</span> <span class='ident'>my_low_char_name</span>.<span class='ident'>get_debug_id</span>();
         <span class='kw'>let</span> <span class='ident'>full_id</span> <span class='op'>=</span> <span class='ident'>my_low_char_name</span>.<span class='ident'>as_hex</span>();
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>debug_id</span>.<span class='ident'>len</span>(), <span class='number'>7</span>);
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>debug_id</span>.<span class='ident'>len</span>(), <span class='number'>6</span>);
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>full_id</span>.<span class='ident'>len</span>(), <span class='number'>2</span> <span class='op'>*</span> <span class='ident'>XOR_NAME_LEN</span>);
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='ident'>debug_id</span>[<span class='number'>0</span>..<span class='number'>4</span>].<span class='ident'>to_uppercase</span>(), <span class='kw-2'>&amp;</span><span class='ident'>full_id</span>[<span class='number'>0</span>..<span class='number'>4</span>].<span class='ident'>to_owned</span>());
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='ident'>debug_id</span>[<span class='number'>0</span>..<span class='number'>4</span>], <span class='kw-2'>&amp;</span><span class='ident'>full_id</span>[<span class='number'>0</span>..<span class='number'>4</span>].<span class='ident'>to_owned</span>());
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
