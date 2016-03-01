@@ -1,5 +1,9 @@
 # XorName - Change Log
 
+## [0.0.5]
+- Migrate to maidsafe_utilities 0.2.1.
+- Make debug hex output lowercase.
+
 ## [0.0.4]
 - Reduce debug output to improve readability.
 
