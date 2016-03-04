@@ -11,9 +11,6 @@ homepage = "http://maidsafe.net"
 
 [dependencies]
 clippy = {version = "~0.0.44", optional = true}
-maidsafe_utilities = "~0.3.0"
+maidsafe_utilities = "~0.4.0"
 rand = "~0.3.14"
 rustc-serialize = "~0.3.18"
-
-[dev-dependencies]
-cbor = "~0.3.16"

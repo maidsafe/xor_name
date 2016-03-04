@@ -340,7 +340,7 @@ impl Decodable for XorName {
 
 #[cfg(test)]
 mod test {
-    extern crate cbor;
+    use maidsafe_utilities::serialisation::{deserialise, serialise};
     use std::cmp::Ordering;
     use super::*;
     use rand;
@@ -348,11 +348,8 @@ mod test {
     #[test]
     fn serialisation_xor_name() {
         let obj_before: XorName = rand::random();
-        let mut e = cbor::Encoder::from_memory();
-        unwrap_result!(e.encode(&[&obj_before]));
-
-        let mut d = cbor::Decoder::from_bytes(e.as_bytes());
-        let obj_after: XorName = unwrap_result!(unwrap_option!(d.decode().next(), ""));
+        let data = unwrap_result!(serialise(&obj_before));
+        let obj_after: XorName = unwrap_result!(deserialise(&data));
         assert_eq!(obj_before, obj_after);
     }
 
