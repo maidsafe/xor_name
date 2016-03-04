@@ -1,5 +1,9 @@
 # XorName - Change Log
 
+## [0.1.0]
+- Replace CBOR usage with maidsafe_utilites::serialisation.
+- Updated dependencies.
+
 ## [0.0.5]
 - Migrate to maidsafe_utilities 0.2.1.
 - Make debug hex output lowercase.
