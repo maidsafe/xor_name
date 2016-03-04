@@ -486,10 +486,6 @@
 <span id="443">443</span>
 <span id="444">444</span>
 <span id="445">445</span>
-<span id="446">446</span>
-<span id="447">447</span>
-<span id="448">448</span>
-<span id="449">449</span>
 </pre><pre class='rust '>
 <span class='comment'>// Copyright 2015 MaidSafe.net limited.</span>
 <span class='comment'>//</span>
@@ -551,12 +547,8 @@
 
 <span class='doccomment'>/// Create a 64-byte array of `u8` from a 64-byte reference to a `u8` slice.</span>
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>slice_as_u8_64_array</span>(<span class='ident'>slice</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>u8</span>]) <span class='op'>-&gt;</span> [<span class='ident'>u8</span>; <span class='number'>64</span>] {
-    <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>slice</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>64</span>);
     <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>arr</span> <span class='op'>=</span> [<span class='number'>0u8</span>; <span class='number'>64</span>];
-    <span class='comment'>// TODO (canndrew): This should use copy_memory when it&#39;s stable</span>
-    <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='number'>0</span>..<span class='number'>64</span> {
-        <span class='ident'>arr</span>[<span class='ident'>i</span>] <span class='op'>=</span> <span class='ident'>slice</span>[<span class='ident'>i</span>];
-    }
+    <span class='ident'>arr</span>.<span class='ident'>clone_from_slice</span>(<span class='kw-2'>&amp;</span><span class='ident'>slice</span>);
     <span class='ident'>arr</span>
 }
 
