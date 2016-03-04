@@ -58,12 +58,8 @@ use std::ops;
 
 /// Create a 64-byte array of `u8` from a 64-byte reference to a `u8` slice.
 pub fn slice_as_u8_64_array(slice: &[u8]) -> [u8; 64] {
-    assert!(slice.len() == 64);
     let mut arr = [0u8; 64];
-    // TODO (canndrew): This should use copy_memory when it's stable
-    for i in 0..64 {
-        arr[i] = slice[i];
-    }
+    arr.clone_from_slice(&slice);
     arr
 }
 
