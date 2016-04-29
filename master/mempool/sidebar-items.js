@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["Guard","A guard for putting values back into the pool on drop."],["Pool","A fast memory pool."],["RefGuard","A guard for putting values back into the pool on drop."]],"type":[["CreateFn","The type of an initialization function."]]});
