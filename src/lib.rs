@@ -92,7 +92,7 @@ pub struct BitIndexOutOfBoundsError;
 /// i. e. the points with IDs `x` and `y` are considered to have distance `x xor y`.
 ///
 /// [1]: https://en.wikipedia.org/wiki/Kademlia#System_details
-#[derive(Eq, Copy)]
+#[derive(Copy)]
 pub struct XorName(pub [u8; XOR_NAME_LEN]);
 
 #[allow(unused)]
@@ -216,6 +216,9 @@ impl PartialEq for XorName {
     fn eq(&self, other: &XorName) -> bool {
         &self.0[..] == &other.0[..]
     }
+}
+
+impl Eq for XorName {
 }
 
 // TODO - document this if required to be public, else move to test mod
