@@ -4,9 +4,6 @@ version = "0.1.0"
 authors = ["MaidSafe Developers <dev@maidsafe.net>"]
 description = "Type with xor methods"
 documentation = "http://maidsafe.net/xor_name/latest"
-repository = "https://github.com/maidsafe/xor_name"
-readme = "README.md"
-license = "GPL-3.0"
 homepage = "http://maidsafe.net"
 edition = "2018"
 
