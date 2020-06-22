@@ -6,14 +6,14 @@
 // KIND, either express or implied. Please review the Licences for the specific language governing
 // permissions and limitations relating to use of the SAFE Network Software.
 
-use super::Xorable;
+use crate::xorable::Xorable;
+use serde::{Deserialize, Serialize};
 use std::{
     cmp::{self, Ordering},
     fmt::{Binary, Debug, Formatter, Result as FmtResult},
     hash::{Hash, Hasher},
     ops::RangeInclusive,
 };
-use serde::{Serialize, Deserialize};
 
 #[cfg(test)]
 use {super::XorName, std::str::FromStr};
@@ -340,8 +340,8 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use rand::thread_rng;
     use rand::seq::SliceRandom;
+    use rand::thread_rng;
 
     #[test]
     fn prefix() {

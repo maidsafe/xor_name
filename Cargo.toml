@@ -2,10 +2,12 @@
 name = "xor_name"
 version = "0.1.0"
 authors = ["MaidSafe Developers <dev@maidsafe.net>"]
-description = "Type with xor methods"
-documentation = "http://maidsafe.net/xor_name/latest"
+description = "Xor Type"
 homepage = "http://maidsafe.net"
 edition = "2018"
+license = "MSD/MIT"
+readme = "README.md"
+repository = "https://github.com/maidsafe/xor-name"
 
 [dependencies]
 rustc-serialize = "~0.3.24"

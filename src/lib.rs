@@ -1,25 +1,84 @@
-// Copyright 2018 MaidSafe.net limited.
+// Copyright 2020 MaidSafe.net limited.
 //
-// This SAFE Network Software is licensed to you under The General Public License (GPL), version 3.
-// Unless required by applicable law or agreed to in writing, the SAFE Network Software distributed
-// under the GPL Licence is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-// KIND, either express or implied. Please review the Licences for the specific language governing
-// permissions and limitations relating to use of the SAFE Network Software.
+// This SAFE Network Software is licensed to you under the MIT license <LICENSE-MIT
+// http://opensource.org/licenses/MIT> or the Modified BSD license <LICENSE-BSD
+// https://opensource.org/licenses/BSD-3-Clause>, at your option. This file may not be copied,
+// modified, or distributed except according to those terms. Please review the Licences for the
+// specific language governing permissions and limitations relating to use of the SAFE Network
+// Software.
 
-mod xorable;
+//! # xor-name
+//!
+//! TODO requires further documentation.
+
+#![doc(
+    html_logo_url = "https://raw.githubusercontent.com/maidsafe/QA/master/Images/maidsafe_logo.png",
+    html_favicon_url = "http://maidsafe.net/img/favicon.ico",
+    html_root_url = "http://maidsafe.github.io/xor_name"
+)]
+// For explanation of lint checks, run `rustc -W help` or see
+// https://github.com/maidsafe/QA/blob/master/Documentation/Rust%20Lint%20Checks.md
+#![forbid(
+    mutable_transmutes,
+    no_mangle_const_items,
+    unknown_crate_types,
+    warnings
+)]
+#![deny(
+    deprecated,
+    improper_ctypes,
+    missing_docs,
+    non_shorthand_field_patterns,
+    overflowing_literals,
+    stable_features,
+    unconditional_recursion,
+    unknown_lints,
+    unsafe_code,
+    unused,
+    unused_allocation,
+    unused_attributes,
+    unused_comparisons,
+    unused_features,
+    unused_parens,
+    while_true
+)]
+#![warn(
+    trivial_casts,
+    trivial_numeric_casts,
+    unused_extern_crates,
+    unused_import_braces,
+    unused_qualifications,
+    unused_results
+)]
+#![allow(
+    box_pointers,
+    missing_copy_implementations,
+    missing_debug_implementations,
+    variant_size_differences
+)]
+#![cfg_attr(feature = "clippy", feature(plugin))]
+#![cfg_attr(feature = "clippy", plugin(clippy))]
+#![cfg_attr(feature = "clippy", deny(clippy, clippy_pedantic))]
+#![cfg_attr(feature = "clippy", allow(use_debug))]
+#![allow(unused_extern_crates)]
+#[macro_use]
+
 mod prefix;
+mod xorable;
 
-pub use xorable::Xorable;
-pub use prefix::Prefix;
 use hex::{FromHex, FromHexError, ToHex};
+use log::error;
 use num_bigint::BigUint;
+pub use prefix::Prefix;
 use rand::{
     distributions::{Distribution, Standard},
     Rng,
 };
-use std::{cmp::Ordering, fmt, ops};
 use serde::{Deserialize, Serialize};
-use log::error;
+use std::cmp::Ordering;
+use std::fmt;
+use std::ops;
+pub use xorable::Xorable;
 
 /// Create a 32-byte array of `u8` from a 32-byte reference to a `u8` slice.
 pub(crate) fn slice_as_u8_32_array(slice: &[u8]) -> [u8; 32] {
@@ -414,7 +473,6 @@ mod tests {
             assert_eq!(xor_from_int(1), xor_from_int(u64::from(y)) / y);
         }
     }
-
 
     #[test]
     fn from_int() {
