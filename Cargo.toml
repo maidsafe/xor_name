@@ -6,7 +6,7 @@ homepage = "http://maidsafe.net"
 license = "GPL-3.0"
 name = "xor_name"
 readme = "README.md"
-repository = "https://github.com/maidsafe/xor_name"
+repository = "https://github.com/maidsafe/xor-name"
 version = "0.1.0"
 
 [dependencies]
