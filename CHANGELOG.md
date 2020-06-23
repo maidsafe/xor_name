@@ -1,5 +1,10 @@
 # XorName - Change Log
 
+## [0.9.0]
+- Extracted from the routing crate to become standalone (again)
+- License details updated to MIT or modified BSD license.
+- CI set up on GitHub Actions
+
 ## [0.1.0]
 - Replace CBOR usage with maidsafe_utilites::serialisation.
 - Updated dependencies.
