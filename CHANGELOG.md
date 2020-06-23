@@ -1,5 +1,8 @@
 # XorName - Change Log
 
+## [0.9.1]
+- Added borrow trait for prefix
+
 ## [0.9.0]
 - Extracted from the routing crate to become standalone (again)
 - License details updated to MIT or modified BSD license.
