@@ -17,7 +17,6 @@ use std::{
     ops::RangeInclusive,
 };
 
-#[cfg(test)]
 use std::str::FromStr;
 
 /// A section prefix, i.e. a sequence of bits specifying the part of the network's name space
@@ -274,7 +273,6 @@ impl<T: Clone + Copy + Default + Binary + Xorable> Debug for Prefix<T> {
     }
 }
 
-#[cfg(test)]
 impl FromStr for Prefix<u8> {
     type Err = String;
 
@@ -300,7 +298,6 @@ impl<T> Borrow<Prefix<XorName>> for (Prefix<XorName>, T) {
     }
 }
 
-#[cfg(test)]
 impl FromStr for Prefix<XorName> {
     type Err = String;
 
