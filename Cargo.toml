@@ -10,15 +10,11 @@ readme = "README.md"
 repository = "https://github.com/maidsafe/xor-name"
 
 [dependencies]
-rustc-serialize = "~0.3.24"
-rand = "0.7.3"
+rand = "~0.7.3"
 num-bigint = "~0.3.0"
-rand_core = "~0.5.1"
 hex = "~0.2.0"
-rand_os = "~0.2.2"
 bincode = "1.2.1"
 serde = { version = "1.0.113", features = ["derive"] }
 log = "0.4.8"
 hex_fmt = "0.1.0"
-rand_xorshift = "0.2.0"
 
