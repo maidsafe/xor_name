@@ -1,5 +1,8 @@
 # XorName - Change Log
 
+## [0.9.2]
+- Remove test barrier from the FromStr trait impl for Prefix
+
 ## [0.9.1]
 - Added borrow trait for prefix
 
