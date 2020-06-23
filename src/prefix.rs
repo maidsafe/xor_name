@@ -7,9 +7,10 @@
 // specific language governing permissions and limitations relating to use of the SAFE Network
 // Software.
 
-use crate::xorable::Xorable;
+use crate::{xorable::Xorable, XorName};
 use serde::{Deserialize, Serialize};
 use std::{
+    borrow::Borrow,
     cmp::{self, Ordering},
     fmt::{Binary, Debug, Formatter, Result as FmtResult},
     hash::{Hash, Hasher},
@@ -17,7 +18,7 @@ use std::{
 };
 
 #[cfg(test)]
-use {super::XorName, std::str::FromStr};
+use std::str::FromStr;
 
 /// A section prefix, i.e. a sequence of bits specifying the part of the network's name space
 /// consisting of all names that start with this sequence.
@@ -290,6 +291,12 @@ impl FromStr for Prefix<u8> {
             }
         }
         Ok(Self::new(bits.len(), name))
+    }
+}
+
+impl<T> Borrow<Prefix<XorName>> for (Prefix<XorName>, T) {
+    fn borrow(&self) -> &Prefix<XorName> {
+        &self.0
     }
 }
 
