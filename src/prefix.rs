@@ -272,9 +272,7 @@ impl Hash for Prefix {
 
 impl Binary for Prefix {
     fn fmt(&self, formatter: &mut Formatter) -> FmtResult {
-        let mut binary = self.name.binary();
-        binary.truncate(self.bit_count());
-        write!(formatter, "{}", binary)
+        write!(formatter, "{0:1$b}", self.name, self.bit_count())
     }
 }
 
@@ -413,6 +411,17 @@ mod tests {
             parse("011").ancestors().collect::<Vec<_>>(),
             vec![parse(""), parse("0"), parse("01")]
         );
+    }
+
+    #[test]
+    fn format_binary() {
+        assert_eq!(format!("{:b}", parse("")), "");
+        assert_eq!(format!("{:b}", parse("0")), "0");
+        assert_eq!(format!("{:b}", parse("00")), "00");
+        assert_eq!(format!("{:b}", parse("01")), "01");
+        assert_eq!(format!("{:b}", parse("10")), "10");
+        assert_eq!(format!("{:b}", parse("11")), "11");
+        assert_eq!(format!("{:b}", parse("1100101")), "1100101");
     }
 
     fn parse(input: &str) -> Prefix {

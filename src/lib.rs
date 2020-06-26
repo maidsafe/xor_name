@@ -62,7 +62,7 @@
 #![cfg_attr(feature = "clippy", allow(use_debug))]
 #![allow(unused_extern_crates)]
 
-use hex::{FromHex, FromHexError, ToHex};
+use hex::{FromHex, FromHexError};
 use log::error;
 use num_bigint::BigUint;
 pub use prefix::Prefix;
@@ -175,11 +175,6 @@ impl XorName {
         self
     }
 
-    /// Hex-encode the `XorName` as a `String`.
-    pub fn to_hex(&self) -> String {
-        self.0.to_hex()
-    }
-
     /// Returns `true` if the `i`-th bit of other has a different value to the `i`-th bit of `self`.
     pub fn differs_in_bit(&self, other: &Self, i: u8) -> bool {
         let index = i / 8;
@@ -251,25 +246,6 @@ impl XorName {
         8 * XOR_NAME_LEN
     }
 
-    /// Returns a binary format string, with leading zero bits included.
-    pub fn binary(&self) -> String {
-        let mut s = String::with_capacity(8 * XOR_NAME_LEN);
-        for byte in &self.0 {
-            s.push_str(&format!("{1:00$b}", 8, byte))
-        }
-        s
-    }
-
-    /// Returns a binary debug format string of `????????...????????`
-    pub fn debug_binary(&self) -> String {
-        debug_format(self.binary())
-    }
-
-    /// Private function exposed in fmt Debug {:?} and Display {} traits.
-    fn get_debug_id(&self) -> String {
-        format!("{:02x}{:02x}{:02x}..", self.0[0], self.0[1], self.0[2])
-    }
-
     /// Used to construct an XorName from a `BigUint`. `value` should not represent a number greater
     /// than or equal to `2^XOR_NAME_BITS`. If it does, the excessive most significant bits are
     /// ignored.
@@ -291,19 +267,75 @@ impl XorName {
 
 impl fmt::Debug for XorName {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        write!(formatter, "{}", self.get_debug_id())
+        write!(formatter, "{}", self)
     }
 }
 
 impl fmt::Display for XorName {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        write!(formatter, "{}", self.get_debug_id())
+        write!(
+            formatter,
+            "{:02x}{:02x}{:02x}..",
+            self.0[0], self.0[1], self.0[2]
+        )
     }
 }
 
 impl fmt::Binary for XorName {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        write!(formatter, "{}", self.debug_binary())
+        if let Some(width) = formatter.width() {
+            let whole_bytes = width / 8;
+            let remaining_bits = width % 8;
+
+            for byte in &self.0[..whole_bytes] {
+                write!(formatter, "{:08b}", byte)?
+            }
+
+            for bit in 0..remaining_bits {
+                write!(formatter, "{}", (self.0[whole_bytes] >> (7 - bit)) & 1)?;
+            }
+
+            if formatter.alternate() && whole_bytes < XOR_NAME_LEN - 1 {
+                write!(formatter, "..")?;
+            }
+        } else {
+            for byte in &self.0 {
+                write!(formatter, "{:08b}", byte)?
+            }
+        }
+        Ok(())
+    }
+}
+
+impl fmt::LowerHex for XorName {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        let bytes = formatter.width().unwrap_or(2 * XOR_NAME_LEN) / 2;
+
+        for byte in &self.0[..bytes] {
+            write!(formatter, "{:02x}", byte)?;
+        }
+
+        if formatter.alternate() && bytes < XOR_NAME_LEN {
+            write!(formatter, "..")?;
+        }
+
+        Ok(())
+    }
+}
+
+impl fmt::UpperHex for XorName {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        let bytes = formatter.width().unwrap_or(2 * XOR_NAME_LEN) / 2;
+
+        for byte in &self.0[..bytes] {
+            write!(formatter, "{:02X}", byte)?;
+        }
+
+        if formatter.alternate() && bytes < XOR_NAME_LEN {
+            write!(formatter, "..")?;
+        }
+
+        Ok(())
     }
 }
 
@@ -401,19 +433,6 @@ impl AsRef<XorName> for XorName {
     }
 }
 
-// Converts a string into debug format of `????????...????????` when the string is longer than 20.
-fn debug_format(input: String) -> String {
-    if input.len() <= 20 {
-        return input;
-    }
-    input
-        .chars()
-        .take(8)
-        .chain("...".chars())
-        .chain(input.chars().skip(input.len() - 8))
-        .collect()
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -472,29 +491,78 @@ mod tests {
     }
 
     #[test]
-    fn format_nametype() {
-        // test for
-        let mut rng = rand::thread_rng();
-        for _ in 0..5 {
-            let my_name: XorName = rng.gen();
-            let debug_id = my_name.get_debug_id();
-            let full_id = my_name.to_hex();
-            assert_eq!(debug_id.len(), 8);
-            assert_eq!(full_id.len(), 2 * XOR_NAME_LEN);
-            assert_eq!(&debug_id[0..6].to_owned(), &full_id[0..6]);
-        }
+    fn format_debug() {
+        assert_eq!(
+            format!("{:?}", xor_name!(0x01, 0x23, 0x45, 0x67)),
+            "012345.."
+        );
+        assert_eq!(
+            format!("{:?}", xor_name!(0x89, 0xab, 0xcd, 0xdf)),
+            "89abcd.."
+        );
     }
 
     #[test]
-    fn format_fixed_low_char_nametype() {
-        // test for fixed low char values in XorName
-        let low_char_id = [1u8; XOR_NAME_LEN];
-        let my_low_char_name = XorName(low_char_id);
-        let debug_id = my_low_char_name.get_debug_id();
-        let full_id = my_low_char_name.to_hex();
-        assert_eq!(debug_id.len(), 8);
-        assert_eq!(full_id.len(), 2 * XOR_NAME_LEN);
-        assert_eq!(&debug_id[0..6], &full_id[0..6].to_owned());
+    fn format_hex() {
+        assert_eq!(
+            format!("{:x}", xor_name!(0x01, 0x23, 0xab)),
+            "0123ab0000000000000000000000000000000000000000000000000000000000"
+        );
+        assert_eq!(format!("{:2x}", xor_name!(0x01, 0x23, 0xab)), "01");
+        assert_eq!(format!("{:4x}", xor_name!(0x01, 0x23, 0xab)), "0123");
+        assert_eq!(format!("{:6x}", xor_name!(0x01, 0x23, 0xab)), "0123ab");
+        assert_eq!(format!("{:8x}", xor_name!(0x01, 0x23, 0xab)), "0123ab00");
+        assert_eq!(format!("{:10x}", xor_name!(0x01, 0x23, 0xab)), "0123ab0000");
+        assert_eq!(format!("{:8X}", xor_name!(0x01, 0x23, 0xab)), "0123AB00");
+
+        assert_eq!(format!("{:#6x}", xor_name!(0x01, 0x23, 0xab)), "0123ab..");
+
+        // odd widths are truncated to nearest even
+        assert_eq!(format!("{:3x}", xor_name!(0x01, 0x23, 0xab)), "01");
+        assert_eq!(format!("{:5x}", xor_name!(0x01, 0x23, 0xab)), "0123");
+    }
+
+    #[test]
+    fn format_binary() {
+        assert_eq!(
+            format!("{:b}", xor_name!(0b00001111, 0b01010101)),
+            "00001111010101010000000000000000000000000000000000000000000000000000000000000000000000\
+             00000000000000000000000000000000000000000000000000000000000000000000000000000000000000\
+             000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+        );
+        assert_eq!(format!("{:1b}", xor_name!(0b00001111, 0b01010101)), "0");
+        assert_eq!(format!("{:2b}", xor_name!(0b00001111, 0b01010101)), "00");
+        assert_eq!(format!("{:3b}", xor_name!(0b00001111, 0b01010101)), "000");
+        assert_eq!(format!("{:4b}", xor_name!(0b00001111, 0b01010101)), "0000");
+        assert_eq!(format!("{:5b}", xor_name!(0b00001111, 0b01010101)), "00001");
+        assert_eq!(
+            format!("{:6b}", xor_name!(0b00001111, 0b01010101)),
+            "000011"
+        );
+        assert_eq!(
+            format!("{:7b}", xor_name!(0b00001111, 0b01010101)),
+            "0000111"
+        );
+        assert_eq!(
+            format!("{:8b}", xor_name!(0b00001111, 0b01010101)),
+            "00001111"
+        );
+        assert_eq!(
+            format!("{:9b}", xor_name!(0b00001111, 0b01010101)),
+            "000011110"
+        );
+        assert_eq!(
+            format!("{:10b}", xor_name!(0b00001111, 0b01010101)),
+            "0000111101"
+        );
+        assert_eq!(
+            format!("{:16b}", xor_name!(0b00001111, 0b01010101)),
+            "0000111101010101"
+        );
+        assert_eq!(
+            format!("{:#8b}", xor_name!(0b00001111, 0b01010101)),
+            "00001111.."
+        );
     }
 
     #[test]
