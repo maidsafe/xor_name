@@ -109,7 +109,7 @@ impl XorName {
     pub fn bit(&self, i: u8) -> bool {
         let index = i / 8;
         let pow_i = 1 << (7 - (i % 8));
-        self.0[index as usize] & pow_i != 0
+        self[index as usize] & pow_i != 0
     }
 
     /// Compares the distance of the arguments to `self`. Returns `Less` if `lhs` is closer,
@@ -117,8 +117,8 @@ impl XorName {
     /// equal if the arguments are equal.)
     pub fn cmp_distance(&self, lhs: &Self, rhs: &Self) -> Ordering {
         for i in 0..XOR_NAME_LEN {
-            if lhs.0[i] != rhs.0[i] {
-                return Ord::cmp(&(lhs.0[i] ^ self.0[i]), &(rhs.0[i] ^ self.0[i]));
+            if lhs[i] != rhs[i] {
+                return Ord::cmp(&(lhs[i] ^ self[i]), &(rhs[i] ^ self[i]));
             }
         }
         Ordering::Equal
@@ -176,9 +176,9 @@ impl XorName {
     /// the when `other = 11110000` and `self = 11111111` this is 4.
     fn common_prefix(&self, other: &Self) -> usize {
         for byte_index in 0..XOR_NAME_LEN {
-            if self.0[byte_index] != other.0[byte_index] {
+            if self[byte_index] != other[byte_index] {
                 return (byte_index * 8)
-                    + (self.0[byte_index] ^ other.0[byte_index]).leading_zeros() as usize;
+                    + (self[byte_index] ^ other[byte_index]).leading_zeros() as usize;
             }
         }
         8 * XOR_NAME_LEN
@@ -211,11 +211,7 @@ impl fmt::Debug for XorName {
 
 impl fmt::Display for XorName {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        write!(
-            formatter,
-            "{:02x}{:02x}{:02x}..",
-            self.0[0], self.0[1], self.0[2]
-        )
+        write!(formatter, "{:02x}{:02x}{:02x}..", self[0], self[1], self[2])
     }
 }
 
@@ -225,19 +221,19 @@ impl fmt::Binary for XorName {
             let whole_bytes = width / 8;
             let remaining_bits = width % 8;
 
-            for byte in &self.0[..whole_bytes] {
+            for byte in &self[..whole_bytes] {
                 write!(formatter, "{:08b}", byte)?
             }
 
             for bit in 0..remaining_bits {
-                write!(formatter, "{}", (self.0[whole_bytes] >> (7 - bit)) & 1)?;
+                write!(formatter, "{}", (self[whole_bytes] >> (7 - bit)) & 1)?;
             }
 
             if formatter.alternate() && whole_bytes < XOR_NAME_LEN - 1 {
                 write!(formatter, "..")?;
             }
         } else {
-            for byte in &self.0 {
+            for byte in &self[..] {
                 write!(formatter, "{:08b}", byte)?
             }
         }
@@ -249,7 +245,7 @@ impl fmt::LowerHex for XorName {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let bytes = formatter.width().unwrap_or(2 * XOR_NAME_LEN) / 2;
 
-        for byte in &self.0[..bytes] {
+        for byte in &self[..bytes] {
             write!(formatter, "{:02x}", byte)?;
         }
 
@@ -265,7 +261,7 @@ impl fmt::UpperHex for XorName {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let bytes = formatter.width().unwrap_or(2 * XOR_NAME_LEN) / 2;
 
-        for byte in &self.0[..bytes] {
+        for byte in &self[..bytes] {
             write!(formatter, "{:02X}", byte)?;
         }
 
@@ -279,46 +275,9 @@ impl fmt::UpperHex for XorName {
 
 impl Distribution<XorName> for Standard {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> XorName {
-        let mut ret = [0u8; XOR_NAME_LEN];
-        for r in ret[..].iter_mut() {
-            *r = rng.gen::<u8>();
-        }
-        XorName(ret)
-    }
-}
-
-impl ops::Index<ops::Range<usize>> for XorName {
-    type Output = [u8];
-
-    fn index(&self, index: ops::Range<usize>) -> &[u8] {
-        let Self(b) = self;
-        b.index(index)
-    }
-}
-impl ops::Index<ops::RangeTo<usize>> for XorName {
-    type Output = [u8];
-
-    fn index(&self, index: ops::RangeTo<usize>) -> &[u8] {
-        let Self(b) = self;
-        b.index(index)
-    }
-}
-
-impl ops::Index<ops::RangeFrom<usize>> for XorName {
-    type Output = [u8];
-
-    fn index(&self, index: ops::RangeFrom<usize>) -> &[u8] {
-        let Self(b) = self;
-        b.index(index)
-    }
-}
-
-impl ops::Index<ops::RangeFull> for XorName {
-    type Output = [u8];
-
-    fn index(&self, index: ops::RangeFull) -> &[u8] {
-        let Self(b) = self;
-        b.index(index)
+        let mut name = XorName::default();
+        rng.fill(&mut name.0[..]);
+        name
     }
 }
 
@@ -368,6 +327,20 @@ impl<'a> ops::Div<&'a u32> for &'a XorName {
 impl AsRef<XorName> for XorName {
     fn as_ref(&self) -> &Self {
         self
+    }
+}
+
+impl AsRef<[u8]> for XorName {
+    fn as_ref(&self) -> &[u8] {
+        &self.0[..]
+    }
+}
+
+impl ops::Deref for XorName {
+    type Target = [u8];
+
+    fn deref(&self) -> &Self::Target {
+        &self.0[..]
     }
 }
 
