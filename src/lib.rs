@@ -56,13 +56,7 @@
     missing_debug_implementations,
     variant_size_differences
 )]
-#![cfg_attr(feature = "clippy", feature(plugin))]
-#![cfg_attr(feature = "clippy", plugin(clippy))]
-#![cfg_attr(feature = "clippy", deny(clippy, clippy_pedantic))]
-#![cfg_attr(feature = "clippy", allow(use_debug))]
-#![allow(unused_extern_crates)]
 
-use hex::{FromHex, FromHexError};
 use log::error;
 use num_bigint::BigUint;
 pub use prefix::Prefix;
@@ -99,15 +93,6 @@ mod prefix;
 /// Constant byte length of `XorName`.
 pub const XOR_NAME_LEN: usize = 32;
 
-/// Errors that can occur when decoding a `XorName` from a string.
-#[derive(Debug)]
-pub enum XorNameFromHexError {
-    /// The given invalid hex character occurred at the given position.
-    InvalidCharacter(char, usize),
-    /// The hex string did not encode `XOR_NAME_LEN` bytes.
-    WrongLength,
-}
-
 /// A 256-bit number, viewed as a point in XOR space.
 ///
 /// This wraps an array of 32 bytes, i. e. a number between 0 and 2<sup>256</sup> - 1.
@@ -127,10 +112,22 @@ impl XorName {
         self.0[index as usize] & pow_i != 0
     }
 
+    /// Compares the distance of the arguments to `self`. Returns `Less` if `lhs` is closer,
+    /// `Greater` if `rhs` is closer, and `Equal` if `lhs == rhs`. (The XOR distance can only be
+    /// equal if the arguments are equal.)
+    pub fn cmp_distance(&self, lhs: &Self, rhs: &Self) -> Ordering {
+        for i in 0..XOR_NAME_LEN {
+            if lhs.0[i] != rhs.0[i] {
+                return Ord::cmp(&(lhs.0[i] ^ self.0[i]), &(rhs.0[i] ^ self.0[i]));
+            }
+        }
+        Ordering::Equal
+    }
+
     /// Returns a copy of `self`, with the `i`-th bit set to `bit`.
     ///
     /// If `i` exceeds the number of bits in `self`, an unmodified copy of `self` is returned.
-    pub fn with_bit(mut self, i: u8, bit: bool) -> Self {
+    fn with_bit(mut self, i: u8, bit: bool) -> Self {
         if i as usize >= XOR_NAME_LEN * 8 {
             return self;
         }
@@ -146,7 +143,7 @@ impl XorName {
     /// Returns a copy of `self`, with the `i`-th bit flipped.
     ///
     /// If `i` exceeds the number of bits in `self`, an unmodified copy of `self` is returned.
-    pub fn with_flipped_bit(mut self, i: u8) -> Self {
+    fn with_flipped_bit(mut self, i: u8) -> Self {
         if i as usize >= XOR_NAME_LEN * 8 {
             return self;
         }
@@ -156,7 +153,7 @@ impl XorName {
 
     /// Returns a copy of self with first `n` bits preserved, and remaining bits
     /// set to 0 (val == false) or 1 (val == true).
-    pub fn set_remaining(mut self, n: u8, val: bool) -> Self {
+    fn set_remaining(mut self, n: u8, val: bool) -> Self {
         for (i, x) in self.0.iter_mut().enumerate() {
             let i = i as u8;
 
@@ -175,68 +172,9 @@ impl XorName {
         self
     }
 
-    /// Returns `true` if the `i`-th bit of other has a different value to the `i`-th bit of `self`.
-    pub fn differs_in_bit(&self, other: &Self, i: u8) -> bool {
-        let index = i / 8;
-        let pow_i = 1 << (7 - (i % 8));
-        (self.0[index as usize] ^ other.0[index as usize]) & pow_i != 0
-    }
-
-    /// Returns the number of bits in which `self` differs from `other`.
-    pub fn count_differing_bits(&self, other: &Self) -> u32 {
-        self.0
-            .iter()
-            .zip(other.0.iter())
-            .fold(0, |acc, (a, b)| acc + (a ^ b).count_ones())
-    }
-
-    /// Hex-decode a `XorName` from a `&str`.
-    pub fn from_hex(s: &str) -> Result<Self, XorNameFromHexError> {
-        let data: Vec<u8> = match FromHex::from_hex(&s) {
-            Ok(v) => v,
-            Err(FromHexError::InvalidHexCharacter { c, index }) => {
-                return Err(XorNameFromHexError::InvalidCharacter(c, index));
-            }
-            Err(FromHexError::InvalidHexLength) => return Err(XorNameFromHexError::WrongLength),
-        };
-        if data.len() != XOR_NAME_LEN {
-            return Err(XorNameFromHexError::WrongLength);
-        }
-
-        let mut inner = [0u8; XOR_NAME_LEN];
-        inner.copy_from_slice(&data);
-
-        Ok(Self(inner))
-    }
-
-    /// Compares the distance of the arguments to `self`. Returns `Less` if `lhs` is closer,
-    /// `Greater` if `rhs` is closer, and `Equal` if `lhs == rhs`. (The XOR distance can only be
-    /// equal if the arguments are equal.)
-    pub fn cmp_distance(&self, lhs: &Self, rhs: &Self) -> Ordering {
-        for i in 0..XOR_NAME_LEN {
-            if lhs.0[i] != rhs.0[i] {
-                return Ord::cmp(&(lhs.0[i] ^ self.0[i]), &(rhs.0[i] ^ self.0[i]));
-            }
-        }
-        Ordering::Equal
-    }
-
-    /// Returns true if `lhs` is closer to `self` than `rhs`.
-    ///
-    /// Equivalently, this returns `true` if in the most significant bit where `lhs` and `rhs`
-    /// disagree, `lhs` agrees with `self`.
-    pub fn closer(&self, lhs: &Self, rhs: &Self) -> bool {
-        self.cmp_distance(lhs, rhs) == Ordering::Less
-    }
-
-    /// Returns true if `lhs` is closer to `self` than `rhs`, or `lhs == rhs`.
-    pub fn closer_or_equal(&self, lhs: &Self, rhs: &Self) -> bool {
-        self.cmp_distance(lhs, rhs) != Ordering::Greater
-    }
-
     /// Returns the length of the common prefix with the `other` name; e. g.
     /// the when `other = 11110000` and `self = 11111111` this is 4.
-    pub fn common_prefix(&self, other: &Self) -> usize {
+    fn common_prefix(&self, other: &Self) -> usize {
         for byte_index in 0..XOR_NAME_LEN {
             if self.0[byte_index] != other.0[byte_index] {
                 return (byte_index * 8)
@@ -481,16 +419,6 @@ mod tests {
     }
 
     #[test]
-    fn closeness() {
-        let mut rng = rand::thread_rng();
-        let obj0: XorName = rng.gen();
-        let obj0_clone = obj0;
-        let obj1: XorName = rng.gen();
-        assert!(obj0.closer(&obj0_clone, &obj1));
-        assert!(!obj0.closer(&obj1, &obj0_clone));
-    }
-
-    #[test]
     fn format_debug() {
         assert_eq!(
             format!("{:?}", xor_name!(0x01, 0x23, 0x45, 0x67)),
@@ -578,17 +506,6 @@ mod tests {
                 name.common_prefix(&name.with_flipped_bit(19 * i as u8))
             );
         }
-    }
-
-    #[test]
-    fn count_differing_bits() {
-        let mut rng = rand::thread_rng();
-        let name: XorName = rng.gen();
-        assert_eq!(0, name.count_differing_bits(&name));
-        let one_bit = name.with_flipped_bit(5);
-        assert_eq!(1, name.count_differing_bits(&one_bit));
-        let two_bits = one_bit.with_flipped_bit(100);
-        assert_eq!(2, name.count_differing_bits(&two_bits));
     }
 
     #[test]
@@ -712,16 +629,6 @@ mod tests {
         assert_eq!(false, xor_name!(2, 128, 1, 0).bit(9));
         assert_eq!(false, xor_name!(2, 128, 1, 0).bit(22));
         assert_eq!(false, xor_name!(2, 128, 1, 0).bit(24));
-    }
-
-    #[test]
-    fn differs_in_bit() {
-        assert!(xor_name!(0b00101010).differs_in_bit(&xor_name!(0b00100010), 4));
-        assert!(xor_name!(0b00101010).differs_in_bit(&xor_name!(0b00000010), 4));
-        assert!(!xor_name!(0b00101010).differs_in_bit(&xor_name!(0b00001010), 4));
-        assert!(xor_name!(0, 0, 0, 0).differs_in_bit(&xor_name!(0, 1, 0, 10), 15));
-        assert!(xor_name!(0, 7, 0, 0).differs_in_bit(&xor_name!(0, 0, 0, 0), 14));
-        assert!(!xor_name!(0, 7, 0, 0).differs_in_bit(&xor_name!(0, 0, 0, 0), 26));
     }
 
     #[test]
