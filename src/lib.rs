@@ -56,18 +56,15 @@
     missing_debug_implementations,
     variant_size_differences
 )]
+#![no_std]
 
-use log::error;
-use num_bigint::BigUint;
+use core::{cmp::Ordering, fmt, ops};
 pub use prefix::Prefix;
 use rand::{
     distributions::{Distribution, Standard},
     Rng,
 };
 use serde::{Deserialize, Serialize};
-use std::cmp::Ordering;
-use std::fmt;
-use std::ops;
 
 /// Creates XorName with the given leading bytes and the rest filled with zeroes.
 #[macro_export]
@@ -85,6 +82,17 @@ macro_rules! xor_name {
         }
 
         name
+    }}
+}
+
+// No-std replacement for std::format! macro which returns `ArrayString` instead of `String`. The
+// capacity of the returned `ArrayString` needs to explicitly given as the first argument.
+#[cfg(test)]
+macro_rules! format {
+    ($capacity:expr, $($arg:tt)*) => {{
+        let mut output = arrayvec::ArrayString::<[_; $capacity]>::new();
+        core::fmt::write(&mut output, core::format_args!($($arg)*)).expect("insufficient ArrayString capacity");
+        output
     }}
 }
 
@@ -183,24 +191,6 @@ impl XorName {
         }
         8 * XOR_NAME_LEN
     }
-
-    /// Used to construct an XorName from a `BigUint`. `value` should not represent a number greater
-    /// than or equal to `2^XOR_NAME_BITS`. If it does, the excessive most significant bits are
-    /// ignored.
-    fn from_big_uint(value: BigUint) -> Self {
-        let little_endian_value = value.to_bytes_le();
-        if little_endian_value.len() > XOR_NAME_LEN {
-            error!("This BigUint value exceeds the maximum capable of being held as an XorName.");
-        }
-        // Convert the little-endian vector to a 32-byte big-endian array.
-        let mut xor_name = Self::default();
-        for (xor_name_elt, little_endian_elt) in
-            xor_name.0.iter_mut().rev().zip(little_endian_value.iter())
-        {
-            *xor_name_elt = *little_endian_elt;
-        }
-        xor_name
-    }
 }
 
 impl fmt::Debug for XorName {
@@ -292,38 +282,6 @@ impl ops::Not for XorName {
     }
 }
 
-impl ops::Sub for XorName {
-    type Output = Self;
-
-    fn sub(self, rhs: Self) -> Self::Output {
-        (&self).sub(&rhs)
-    }
-}
-
-impl<'a> ops::Sub for &'a XorName {
-    type Output = XorName;
-
-    fn sub(self, rhs: &XorName) -> Self::Output {
-        XorName::from_big_uint(BigUint::from_bytes_be(&self.0) - BigUint::from_bytes_be(&rhs.0))
-    }
-}
-
-impl ops::Div<u32> for XorName {
-    type Output = Self;
-
-    fn div(self, rhs: u32) -> Self::Output {
-        (&self).div(&rhs)
-    }
-}
-
-impl<'a> ops::Div<&'a u32> for &'a XorName {
-    type Output = XorName;
-
-    fn div(self, rhs: &u32) -> Self::Output {
-        XorName::from_big_uint(BigUint::from_bytes_be(&self.0) / BigUint::new(vec![*rhs]))
-    }
-}
-
 impl AsRef<XorName> for XorName {
     fn as_ref(&self) -> &Self {
         self
@@ -348,11 +306,11 @@ impl ops::Deref for XorName {
 mod tests {
     use super::*;
     use bincode::{deserialize, serialize};
-    use std::cmp::Ordering;
+    use rand::{rngs::SmallRng, SeedableRng};
 
     #[test]
     fn serialisation_xor_name() {
-        let mut rng = rand::thread_rng();
+        let mut rng = SmallRng::from_entropy();
         let obj_before: XorName = rng.gen();
         let data = serialize(&obj_before).unwrap();
         assert_eq!(data.len(), XOR_NAME_LEN);
@@ -382,7 +340,7 @@ mod tests {
 
     #[test]
     fn xor_name_equal_assertion() {
-        let mut rng = rand::thread_rng();
+        let mut rng = SmallRng::from_entropy();
         let type1: XorName = rng.gen();
         let type1_clone = type1;
         let type2: XorName = rng.gen();
@@ -394,11 +352,11 @@ mod tests {
     #[test]
     fn format_debug() {
         assert_eq!(
-            format!("{:?}", xor_name!(0x01, 0x23, 0x45, 0x67)),
+            &format!(8, "{:?}", xor_name!(0x01, 0x23, 0x45, 0x67)),
             "012345.."
         );
         assert_eq!(
-            format!("{:?}", xor_name!(0x89, 0xab, 0xcd, 0xdf)),
+            &format!(8, "{:?}", xor_name!(0x89, 0xab, 0xcd, 0xdf)),
             "89abcd.."
         );
     }
@@ -406,69 +364,93 @@ mod tests {
     #[test]
     fn format_hex() {
         assert_eq!(
-            format!("{:x}", xor_name!(0x01, 0x23, 0xab)),
+            &format!(64, "{:x}", xor_name!(0x01, 0x23, 0xab)),
             "0123ab0000000000000000000000000000000000000000000000000000000000"
         );
-        assert_eq!(format!("{:2x}", xor_name!(0x01, 0x23, 0xab)), "01");
-        assert_eq!(format!("{:4x}", xor_name!(0x01, 0x23, 0xab)), "0123");
-        assert_eq!(format!("{:6x}", xor_name!(0x01, 0x23, 0xab)), "0123ab");
-        assert_eq!(format!("{:8x}", xor_name!(0x01, 0x23, 0xab)), "0123ab00");
-        assert_eq!(format!("{:10x}", xor_name!(0x01, 0x23, 0xab)), "0123ab0000");
-        assert_eq!(format!("{:8X}", xor_name!(0x01, 0x23, 0xab)), "0123AB00");
+        assert_eq!(&format!(2, "{:2x}", xor_name!(0x01, 0x23, 0xab)), "01");
+        assert_eq!(&format!(4, "{:4x}", xor_name!(0x01, 0x23, 0xab)), "0123");
+        assert_eq!(&format!(6, "{:6x}", xor_name!(0x01, 0x23, 0xab)), "0123ab");
+        assert_eq!(
+            &format!(8, "{:8x}", xor_name!(0x01, 0x23, 0xab)),
+            "0123ab00"
+        );
+        assert_eq!(
+            &format!(10, "{:10x}", xor_name!(0x01, 0x23, 0xab)),
+            "0123ab0000"
+        );
+        assert_eq!(
+            &format!(8, "{:8X}", xor_name!(0x01, 0x23, 0xab)),
+            "0123AB00"
+        );
 
-        assert_eq!(format!("{:#6x}", xor_name!(0x01, 0x23, 0xab)), "0123ab..");
+        assert_eq!(
+            &format!(8, "{:#6x}", xor_name!(0x01, 0x23, 0xab)),
+            "0123ab.."
+        );
 
         // odd widths are truncated to nearest even
-        assert_eq!(format!("{:3x}", xor_name!(0x01, 0x23, 0xab)), "01");
-        assert_eq!(format!("{:5x}", xor_name!(0x01, 0x23, 0xab)), "0123");
+        assert_eq!(&format!(2, "{:3x}", xor_name!(0x01, 0x23, 0xab)), "01");
+        assert_eq!(&format!(4, "{:5x}", xor_name!(0x01, 0x23, 0xab)), "0123");
     }
 
     #[test]
     fn format_binary() {
         assert_eq!(
-            format!("{:b}", xor_name!(0b00001111, 0b01010101)),
+            &format!(256, "{:b}", xor_name!(0b00001111, 0b01010101)),
             "00001111010101010000000000000000000000000000000000000000000000000000000000000000000000\
              00000000000000000000000000000000000000000000000000000000000000000000000000000000000000\
              000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
         );
-        assert_eq!(format!("{:1b}", xor_name!(0b00001111, 0b01010101)), "0");
-        assert_eq!(format!("{:2b}", xor_name!(0b00001111, 0b01010101)), "00");
-        assert_eq!(format!("{:3b}", xor_name!(0b00001111, 0b01010101)), "000");
-        assert_eq!(format!("{:4b}", xor_name!(0b00001111, 0b01010101)), "0000");
-        assert_eq!(format!("{:5b}", xor_name!(0b00001111, 0b01010101)), "00001");
+        assert_eq!(&format!(1, "{:1b}", xor_name!(0b00001111, 0b01010101)), "0");
         assert_eq!(
-            format!("{:6b}", xor_name!(0b00001111, 0b01010101)),
+            &format!(2, "{:2b}", xor_name!(0b00001111, 0b01010101)),
+            "00"
+        );
+        assert_eq!(
+            &format!(3, "{:3b}", xor_name!(0b00001111, 0b01010101)),
+            "000"
+        );
+        assert_eq!(
+            &format!(4, "{:4b}", xor_name!(0b00001111, 0b01010101)),
+            "0000"
+        );
+        assert_eq!(
+            &format!(5, "{:5b}", xor_name!(0b00001111, 0b01010101)),
+            "00001"
+        );
+        assert_eq!(
+            &format!(6, "{:6b}", xor_name!(0b00001111, 0b01010101)),
             "000011"
         );
         assert_eq!(
-            format!("{:7b}", xor_name!(0b00001111, 0b01010101)),
+            &format!(7, "{:7b}", xor_name!(0b00001111, 0b01010101)),
             "0000111"
         );
         assert_eq!(
-            format!("{:8b}", xor_name!(0b00001111, 0b01010101)),
+            &format!(8, "{:8b}", xor_name!(0b00001111, 0b01010101)),
             "00001111"
         );
         assert_eq!(
-            format!("{:9b}", xor_name!(0b00001111, 0b01010101)),
+            &format!(9, "{:9b}", xor_name!(0b00001111, 0b01010101)),
             "000011110"
         );
         assert_eq!(
-            format!("{:10b}", xor_name!(0b00001111, 0b01010101)),
+            &format!(10, "{:10b}", xor_name!(0b00001111, 0b01010101)),
             "0000111101"
         );
         assert_eq!(
-            format!("{:16b}", xor_name!(0b00001111, 0b01010101)),
+            &format!(16, "{:16b}", xor_name!(0b00001111, 0b01010101)),
             "0000111101010101"
         );
         assert_eq!(
-            format!("{:#8b}", xor_name!(0b00001111, 0b01010101)),
+            &format!(10, "{:#8b}", xor_name!(0b00001111, 0b01010101)),
             "00001111.."
         );
     }
 
     #[test]
     fn with_flipped_bit() {
-        let mut rng = rand::thread_rng();
+        let mut rng = SmallRng::from_entropy();
         let name: XorName = rng.gen();
         for i in 0..18 {
             assert_eq!(i, name.common_prefix(&name.with_flipped_bit(i as u8)));
@@ -478,38 +460,6 @@ mod tests {
                 19 * i,
                 name.common_prefix(&name.with_flipped_bit(19 * i as u8))
             );
-        }
-    }
-
-    #[test]
-    fn subtraction() {
-        let mut rng = rand::thread_rng();
-        for _ in 0..100_000 {
-            let x = rng.gen();
-            let y = rng.gen();
-            let (larger, smaller) = if x > y { (x, y) } else { (y, x) };
-            assert_eq!(
-                &from_u64(larger - smaller)[..],
-                &(from_u64(larger) - from_u64(smaller))[..]
-            );
-            assert_eq!(XorName::default(), from_u64(x) - from_u64(x));
-        }
-    }
-
-    #[test]
-    #[should_panic]
-    fn subtraction_underflow() {
-        let _ = from_u64(1_000_001) - from_u64(1_000_002);
-    }
-
-    #[test]
-    fn division() {
-        let mut rng = rand::thread_rng();
-        for _ in 0..100_000 {
-            let x = rng.gen();
-            let y = rng.gen::<u32>().saturating_add(1);
-            assert_eq!(from_u64(x / u64::from(y)), from_u64(x) / y);
-            assert_eq!(from_u64(1), from_u64(u64::from(y)) / y);
         }
     }
 
@@ -645,7 +595,7 @@ mod tests {
 
     #[test]
     fn xor_name_macro() {
-        let mut rng = rand::thread_rng();
+        let mut rng = SmallRng::from_entropy();
 
         for _ in 0..100 {
             let byte = rng.gen();

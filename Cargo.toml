@@ -10,10 +10,11 @@ readme = "README.md"
 repository = "https://github.com/maidsafe/xor-name"
 
 [dependencies]
-rand = "~0.7.3"
-num-bigint = "~0.3.0"
-serde = { version = "1.0.113", features = ["derive"] }
 log = "~0.4.8"
+rand = { version = "~0.7.3", default-features = false }
+serde = { version = "1.0.113", default-features = false, features = ["derive"] }
 
 [dev-dependencies]
+arrayvec = { version = "~0.5.1", default-features = false }
 bincode = "1.2.1"
+rand = { version = "~0.7.3", default-features = false, features = ["getrandom", "small_rng"] }

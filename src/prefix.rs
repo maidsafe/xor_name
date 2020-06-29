@@ -8,16 +8,15 @@
 // Software.
 
 use crate::{XorName, XOR_NAME_LEN};
-use serde::{Deserialize, Serialize};
-use std::{
+use core::{
     borrow::Borrow,
     cmp::{self, Ordering},
-    fmt::{Binary, Debug, Formatter, Result as FmtResult},
+    fmt::{Binary, Debug, Display, Formatter, Result as FmtResult},
     hash::{Hash, Hasher},
     ops::RangeInclusive,
+    str::FromStr,
 };
-
-use std::str::FromStr;
+use serde::{Deserialize, Serialize};
 
 /// A section prefix, i.e. a sequence of bits specifying the part of the network's name space
 /// consisting of all names that start with this sequence.
@@ -288,20 +287,32 @@ impl<T> Borrow<Prefix> for (Prefix, T) {
     }
 }
 
-impl FromStr for Prefix {
-    type Err = String;
+#[derive(Debug)]
+pub struct FromStrError {
+    pub invalid_char: char,
+}
 
-    fn from_str(bits: &str) -> Result<Self, String> {
+impl Display for FromStrError {
+    fn fmt(&self, formatter: &mut Formatter) -> FmtResult {
+        write!(
+            formatter,
+            "'{}' not allowed - the string must represent a binary number.",
+            self.invalid_char
+        )
+    }
+}
+
+impl FromStr for Prefix {
+    type Err = FromStrError;
+
+    fn from_str(bits: &str) -> Result<Self, Self::Err> {
         let mut name = [0; XOR_NAME_LEN];
         for (i, bit) in bits.chars().enumerate() {
             if bit == '1' {
                 let byte = i / 8;
                 name[byte] |= 1 << (7 - i);
             } else if bit != '0' {
-                return Err(format!(
-                    "'{}' not allowed - the string must represent a binary number.",
-                    bit
-                ));
+                return Err(FromStrError { invalid_char: bit });
             }
         }
         Ok(Self::new(bits.len(), XorName(name)))
@@ -332,8 +343,7 @@ impl Iterator for Ancestors {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use rand::seq::SliceRandom;
-    use rand::thread_rng;
+    use rand::{rngs::SmallRng, seq::SliceRandom, SeedableRng};
 
     #[test]
     fn prefix() {
@@ -385,7 +395,7 @@ mod tests {
             parse("111"),
         ];
 
-        let mut rng = thread_rng();
+        let mut rng = SmallRng::from_entropy();
 
         for _ in 0..100 {
             let mut actual = expected;
@@ -398,30 +408,34 @@ mod tests {
 
     #[test]
     fn ancestors() {
-        assert_eq!(parse("").ancestors().collect::<Vec<_>>(), vec![]);
+        let mut ancestors = parse("").ancestors();
+        assert_eq!(ancestors.next(), None);
 
-        assert_eq!(parse("0").ancestors().collect::<Vec<_>>(), vec![parse("")]);
+        let mut ancestors = parse("0").ancestors();
+        assert_eq!(ancestors.next(), Some(parse("")));
+        assert_eq!(ancestors.next(), None);
 
-        assert_eq!(
-            parse("01").ancestors().collect::<Vec<_>>(),
-            vec![parse(""), parse("0")]
-        );
+        let mut ancestors = parse("01").ancestors();
+        assert_eq!(ancestors.next(), Some(parse("")));
+        assert_eq!(ancestors.next(), Some(parse("0")));
+        assert_eq!(ancestors.next(), None);
 
-        assert_eq!(
-            parse("011").ancestors().collect::<Vec<_>>(),
-            vec![parse(""), parse("0"), parse("01")]
-        );
+        let mut ancestors = parse("011").ancestors();
+        assert_eq!(ancestors.next(), Some(parse("")));
+        assert_eq!(ancestors.next(), Some(parse("0")));
+        assert_eq!(ancestors.next(), Some(parse("01")));
+        assert_eq!(ancestors.next(), None);
     }
 
     #[test]
     fn format_binary() {
-        assert_eq!(format!("{:b}", parse("")), "");
-        assert_eq!(format!("{:b}", parse("0")), "0");
-        assert_eq!(format!("{:b}", parse("00")), "00");
-        assert_eq!(format!("{:b}", parse("01")), "01");
-        assert_eq!(format!("{:b}", parse("10")), "10");
-        assert_eq!(format!("{:b}", parse("11")), "11");
-        assert_eq!(format!("{:b}", parse("1100101")), "1100101");
+        assert_eq!(&format!(0, "{:b}", parse("")), "");
+        assert_eq!(&format!(1, "{:b}", parse("0")), "0");
+        assert_eq!(&format!(2, "{:b}", parse("00")), "00");
+        assert_eq!(&format!(2, "{:b}", parse("01")), "01");
+        assert_eq!(&format!(2, "{:b}", parse("10")), "10");
+        assert_eq!(&format!(2, "{:b}", parse("11")), "11");
+        assert_eq!(&format!(7, "{:b}", parse("1100101")), "1100101");
     }
 
     fn parse(input: &str) -> Prefix {
