@@ -1,5 +1,11 @@
 # XorName - Change Log
 
+## [1.0.0]
+- Make the crate no_std
+- Add impl Deref for XorName, remove slice indexing
+- Minimise the API surface
+- Remove generics
+
 ## [0.9.2]
 - Remove test barrier from the FromStr trait impl for Prefix
 
