@@ -62,10 +62,11 @@ use core::{cmp::Ordering, fmt, ops};
 pub use prefix::Prefix;
 use rand::{
     distributions::{Distribution, Standard},
-    Rng, rngs::OsRng
+    rngs::OsRng,
+    Rng,
 };
-use serde::{Deserialize, Serialize};
 use rand_core::RngCore;
+use serde::{Deserialize, Serialize};
 /// Creates XorName with the given leading bytes and the rest filled with zeroes.
 #[macro_export]
 macro_rules! xor_name {
