@@ -114,9 +114,10 @@ pub const XOR_NAME_LEN: usize = 32;
 pub struct XorName(pub [u8; XOR_NAME_LEN]);
 
 impl XorName {
-    /// Generate a random Xorname
+    /// Generate a random XorName
     pub fn random() -> XorName {
         let mut xor = [0u8; XOR_NAME_LEN];
+        // TODO: OsRng needs to be removed + replaced to follow no-std.
         OsRng.fill_bytes(&mut xor);
 
         Self(xor)
