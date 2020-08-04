@@ -62,11 +62,10 @@ use core::{cmp::Ordering, fmt, ops};
 pub use prefix::Prefix;
 use rand::{
     distributions::{Distribution, Standard},
-    rngs::SmallRng,
-    Rng, SeedableRng,
+    Rng, rngs::OsRng
 };
 use serde::{Deserialize, Serialize};
-
+use rand_core::RngCore;
 /// Creates XorName with the given leading bytes and the rest filled with zeroes.
 #[macro_export]
 macro_rules! xor_name {
@@ -116,10 +115,10 @@ pub struct XorName(pub [u8; XOR_NAME_LEN]);
 impl XorName {
     /// Generate a random Xorname
     pub fn random() -> XorName {
-        let mut rng = SmallRng::from_entropy();
-        let random_xor: XorName = rng.gen();
+        let mut xor = [0u8; XOR_NAME_LEN];
+        OsRng.fill_bytes(&mut xor);
 
-        random_xor
+        Self(xor)
     }
 
     /// Returns `true` if the `i`-th bit is `1`.
