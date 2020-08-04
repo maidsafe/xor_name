@@ -62,7 +62,8 @@ use core::{cmp::Ordering, fmt, ops};
 pub use prefix::Prefix;
 use rand::{
     distributions::{Distribution, Standard},
-    Rng,
+    rngs::SmallRng,
+    Rng, SeedableRng,
 };
 use serde::{Deserialize, Serialize};
 
@@ -113,6 +114,14 @@ pub const XOR_NAME_LEN: usize = 32;
 pub struct XorName(pub [u8; XOR_NAME_LEN]);
 
 impl XorName {
+    /// Generate a random Xorname
+    pub fn random() -> XorName {
+        let mut rng = SmallRng::from_entropy();
+        let random_xor: XorName = rng.gen();
+
+        random_xor
+    }
+
     /// Returns `true` if the `i`-th bit is `1`.
     pub fn bit(&self, i: u8) -> bool {
         let index = i / 8;
@@ -309,9 +318,16 @@ mod tests {
     use rand::{rngs::SmallRng, SeedableRng};
 
     #[test]
+    fn create_random_xorname() {
+        let xorname: XorName = XorName::random();
+        let xorname2: XorName = XorName::random();
+
+        assert_ne!(xorname, xorname2);
+    }
+
+    #[test]
     fn serialisation_xor_name() {
-        let mut rng = SmallRng::from_entropy();
-        let obj_before: XorName = rng.gen();
+        let obj_before: XorName = XorName::random();
         let data = serialize(&obj_before).unwrap();
         assert_eq!(data.len(), XOR_NAME_LEN);
         let obj_after: XorName = deserialize(&data).unwrap();
