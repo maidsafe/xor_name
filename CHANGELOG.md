@@ -1,5 +1,9 @@
 # XorName - Change Log
 
+## [1.1.0]
+- Add in `XorName::random()` functionality
+- Use OSRng
+
 ## [1.0.0]
 - Make the crate no_std
 - Add impl Deref for XorName, remove slice indexing
