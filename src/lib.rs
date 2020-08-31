@@ -7,7 +7,7 @@
 // specific language governing permissions and limitations relating to use of the SAFE Network
 // Software.
 
-//! # xor-name
+//! # xor_name
 //!
 //! TODO requires further documentation.
 

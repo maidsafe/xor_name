@@ -7,7 +7,7 @@ homepage = "http://maidsafe.net"
 edition = "2018"
 license = "MIT OR BSD-3-Clause"
 readme = "README.md"
-repository = "https://github.com/maidsafe/xor-name"
+repository = "https://github.com/maidsafe/xor_name"
 
 [dependencies]
 log = "~0.4.8"

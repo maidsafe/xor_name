@@ -1,4 +1,4 @@
-# xor-name
+# xor_name
 
 XorName is an array that is useful for calculations in DHT
 
