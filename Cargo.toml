@@ -1,6 +1,6 @@
 [package]
 name = "xor_name"
-version = "1.1.1"
+version = "1.1.2"
 authors = [ "MaidSafe Developers <dev@maidsafe.net>" ]
 description = "Xor Type"
 homepage = "http://maidsafe.net"
