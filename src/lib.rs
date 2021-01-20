@@ -18,12 +18,7 @@
 )]
 // For explanation of lint checks, run `rustc -W help` or see
 // https://github.com/maidsafe/QA/blob/master/Documentation/Rust%20Lint%20Checks.md
-#![forbid(
-    mutable_transmutes,
-    no_mangle_const_items,
-    unknown_crate_types,
-    warnings
-)]
+#![forbid(mutable_transmutes, no_mangle_const_items, unknown_crate_types)]
 #![deny(
     deprecated,
     improper_ctypes,
@@ -40,7 +35,8 @@
     unused_comparisons,
     unused_features,
     unused_parens,
-    while_true
+    while_true,
+    warnings
 )]
 #![warn(
     trivial_casts,
