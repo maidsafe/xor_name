@@ -646,10 +646,6 @@
 <span id="645">645</span>
 <span id="646">646</span>
 <span id="647">647</span>
-<span id="648">648</span>
-<span id="649">649</span>
-<span id="650">650</span>
-<span id="651">651</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">// Copyright 2020 MaidSafe.net limited.</span>
 <span class="comment">//</span>
@@ -671,12 +667,7 @@
 )]</span>
 <span class="comment">// For explanation of lint checks, run `rustc -W help` or see</span>
 <span class="comment">// https://github.com/maidsafe/QA/blob/master/Documentation/Rust%20Lint%20Checks.md</span>
-<span class="attribute">#![<span class="ident">forbid</span>(
-    <span class="ident">mutable_transmutes</span>,
-    <span class="ident">no_mangle_const_items</span>,
-    <span class="ident">unknown_crate_types</span>,
-    <span class="ident">warnings</span>
-)]</span>
+<span class="attribute">#![<span class="ident">forbid</span>(<span class="ident">mutable_transmutes</span>, <span class="ident">no_mangle_const_items</span>, <span class="ident">unknown_crate_types</span>)]</span>
 <span class="attribute">#![<span class="ident">deny</span>(
     <span class="ident">deprecated</span>,
     <span class="ident">improper_ctypes</span>,
@@ -693,7 +684,8 @@
     <span class="ident">unused_comparisons</span>,
     <span class="ident">unused_features</span>,
     <span class="ident">unused_parens</span>,
-    <span class="ident">while_true</span>
+    <span class="ident">while_true</span>,
+    <span class="ident">warnings</span>
 )]</span>
 <span class="attribute">#![<span class="ident">warn</span>(
     <span class="ident">trivial_casts</span>,
