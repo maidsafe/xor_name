@@ -63,6 +63,8 @@ use rand::{
 };
 use rand_core::RngCore;
 use serde::{Deserialize, Serialize};
+use tiny_keccak::{Hasher, Sha3};
+
 /// Creates XorName with the given leading bytes and the rest filled with zeroes.
 #[macro_export]
 macro_rules! xor_name {
@@ -110,8 +112,19 @@ pub const XOR_NAME_LEN: usize = 32;
 pub struct XorName(pub [u8; XOR_NAME_LEN]);
 
 impl XorName {
+    /// Generate a XorName for the given content (for content-addressable-storage)
+    pub fn from_content(content_parts: &[&[u8]]) -> Self {
+        let mut sha3 = Sha3::v256();
+        for part in content_parts.iter() {
+            sha3.update(part);
+        }
+        let mut hash = [0u8; 32];
+        sha3.finalize(&mut hash);
+        Self(hash)
+    }
+
     /// Generate a random XorName
-    pub fn random() -> XorName {
+    pub fn random() -> Self {
         let mut xor = [0u8; XOR_NAME_LEN];
         // TODO: OsRng needs to be removed + replaced to follow no-std.
         OsRng.fill_bytes(&mut xor);
@@ -635,6 +648,23 @@ mod tests {
             &from_u64(0x0123456789abcdef)[XOR_NAME_LEN - 8..],
             &[0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef]
         );
+    }
+
+    #[test]
+    fn xor_name_from_content() {
+        let alpha_1 = XorName::from_content(&["abcdefg".as_bytes(), "hijk".as_bytes()]);
+        let alpha_2 = XorName::from_content(&["abcdefg".as_bytes(), "hijk".as_bytes()]);
+        let alpha_3 = XorName::from_content(&["abcdefg".as_bytes()]);
+
+        assert_eq!(alpha_1, alpha_2);
+        assert_ne!(alpha_1, alpha_3);
+    }
+
+    #[test]
+    fn xor_name_from_content_is_agnostic_to_where_content_parts_splits() {
+        let alpha_1 = XorName::from_content(&["abcdefg".as_bytes(), "hijk".as_bytes()]);
+        let alpha_2 = XorName::from_content(&["abcdefghijk".as_bytes()]);
+        assert_eq!(alpha_1, alpha_2);
     }
 
     // Create a `XorName` with the 8 trailing bytes equal to `x` (in big endian order) and the rest
