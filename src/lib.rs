@@ -115,7 +115,7 @@ impl XorName {
     /// Generate a XorName for the given content (for content-addressable-storage)
     pub fn from_content(content_parts: &[&[u8]]) -> Self {
         let mut sha3 = Sha3::v256();
-        for part in content_parts.iter() {
+        for part in content_parts {
             sha3.update(part);
         }
         let mut hash = [0u8; 32];
@@ -652,9 +652,9 @@ mod tests {
 
     #[test]
     fn xor_name_from_content() {
-        let alpha_1 = XorName::from_content(&["abcdefg".as_bytes(), "hijk".as_bytes()]);
-        let alpha_2 = XorName::from_content(&["abcdefg".as_bytes(), "hijk".as_bytes()]);
-        let alpha_3 = XorName::from_content(&["abcdefg".as_bytes()]);
+        let alpha_1 = XorName::from_content(&[b"abcdefg", b"hijk"]);
+        let alpha_2 = XorName::from_content(&[b"abcdefg", b"hijk"]);
+        let alpha_3 = XorName::from_content(&[b"abcdefg"]);
 
         assert_eq!(alpha_1, alpha_2);
         assert_ne!(alpha_1, alpha_3);
@@ -662,8 +662,8 @@ mod tests {
 
     #[test]
     fn xor_name_from_content_is_agnostic_to_where_content_parts_splits() {
-        let alpha_1 = XorName::from_content(&["abcdefg".as_bytes(), "hijk".as_bytes()]);
-        let alpha_2 = XorName::from_content(&["abcdefghijk".as_bytes()]);
+        let alpha_1 = XorName::from_content(&[b"abcdefg", b"hijk"]);
+        let alpha_2 = XorName::from_content(&[b"abcdefghijk"]);
         assert_eq!(alpha_1, alpha_2);
     }
 
