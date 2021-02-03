@@ -646,6 +646,36 @@
 <span id="645">645</span>
 <span id="646">646</span>
 <span id="647">647</span>
+<span id="648">648</span>
+<span id="649">649</span>
+<span id="650">650</span>
+<span id="651">651</span>
+<span id="652">652</span>
+<span id="653">653</span>
+<span id="654">654</span>
+<span id="655">655</span>
+<span id="656">656</span>
+<span id="657">657</span>
+<span id="658">658</span>
+<span id="659">659</span>
+<span id="660">660</span>
+<span id="661">661</span>
+<span id="662">662</span>
+<span id="663">663</span>
+<span id="664">664</span>
+<span id="665">665</span>
+<span id="666">666</span>
+<span id="667">667</span>
+<span id="668">668</span>
+<span id="669">669</span>
+<span id="670">670</span>
+<span id="671">671</span>
+<span id="672">672</span>
+<span id="673">673</span>
+<span id="674">674</span>
+<span id="675">675</span>
+<span id="676">676</span>
+<span id="677">677</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">// Copyright 2020 MaidSafe.net limited.</span>
 <span class="comment">//</span>
@@ -712,6 +742,8 @@
 };
 <span class="kw">use</span> <span class="ident">rand_core</span>::<span class="ident">RngCore</span>;
 <span class="kw">use</span> <span class="ident">serde</span>::{<span class="ident">Deserialize</span>, <span class="ident">Serialize</span>};
+<span class="kw">use</span> <span class="ident">tiny_keccak</span>::{<span class="ident">Hasher</span>, <span class="ident">Sha3</span>};
+
 <span class="doccomment">/// Creates XorName with the given leading bytes and the rest filled with zeroes.</span>
 <span class="attribute">#[<span class="ident">macro_export</span>]</span>
 <span class="macro">macro_rules</span><span class="macro">!</span> <span class="ident">xor_name</span> {
@@ -759,8 +791,19 @@
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">XorName</span>(<span class="kw">pub</span> [<span class="ident">u8</span>; <span class="ident">XOR_NAME_LEN</span>]);
 
 <span class="kw">impl</span> <span class="ident">XorName</span> {
+    <span class="doccomment">/// Generate a XorName for the given content (for content-addressable-storage)</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_content</span>(<span class="ident">content_parts</span>: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span>[<span class="ident">u8</span>]]) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">sha3</span> <span class="op">=</span> <span class="ident">Sha3</span>::<span class="ident">v256</span>();
+        <span class="kw">for</span> <span class="ident">part</span> <span class="kw">in</span> <span class="ident">content_parts</span> {
+            <span class="ident">sha3</span>.<span class="ident">update</span>(<span class="ident">part</span>);
+        }
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">hash</span> <span class="op">=</span> [<span class="number">0u8</span>; <span class="number">32</span>];
+        <span class="ident">sha3</span>.<span class="ident">finalize</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">hash</span>);
+        <span class="self">Self</span>(<span class="ident">hash</span>)
+    }
+
     <span class="doccomment">/// Generate a random XorName</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">random</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">XorName</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">random</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">xor</span> <span class="op">=</span> [<span class="number">0u8</span>; <span class="ident">XOR_NAME_LEN</span>];
         <span class="comment">// TODO: OsRng needs to be removed + replaced to follow no-std.</span>
         <span class="ident">OsRng</span>.<span class="ident">fill_bytes</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">xor</span>);
@@ -1284,6 +1327,23 @@
             <span class="kw-2">&amp;</span><span class="ident">from_u64</span>(<span class="number">0x0123456789abcdef</span>)[<span class="ident">XOR_NAME_LEN</span> <span class="op">-</span> <span class="number">8</span>..],
             <span class="kw-2">&amp;</span>[<span class="number">0x01</span>, <span class="number">0x23</span>, <span class="number">0x45</span>, <span class="number">0x67</span>, <span class="number">0x89</span>, <span class="number">0xab</span>, <span class="number">0xcd</span>, <span class="number">0xef</span>]
         );
+    }
+
+    <span class="attribute">#[<span class="ident">test</span>]</span>
+    <span class="kw">fn</span> <span class="ident">xor_name_from_content</span>() {
+        <span class="kw">let</span> <span class="ident">alpha_1</span> <span class="op">=</span> <span class="ident">XorName</span>::<span class="ident">from_content</span>(<span class="kw-2">&amp;</span>[<span class="string">b&quot;abcdefg&quot;</span>, <span class="string">b&quot;hijk&quot;</span>]);
+        <span class="kw">let</span> <span class="ident">alpha_2</span> <span class="op">=</span> <span class="ident">XorName</span>::<span class="ident">from_content</span>(<span class="kw-2">&amp;</span>[<span class="string">b&quot;abcdefg&quot;</span>, <span class="string">b&quot;hijk&quot;</span>]);
+        <span class="kw">let</span> <span class="ident">alpha_3</span> <span class="op">=</span> <span class="ident">XorName</span>::<span class="ident">from_content</span>(<span class="kw-2">&amp;</span>[<span class="string">b&quot;abcdefg&quot;</span>]);
+
+        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">alpha_1</span>, <span class="ident">alpha_2</span>);
+        <span class="macro">assert_ne</span><span class="macro">!</span>(<span class="ident">alpha_1</span>, <span class="ident">alpha_3</span>);
+    }
+
+    <span class="attribute">#[<span class="ident">test</span>]</span>
+    <span class="kw">fn</span> <span class="ident">xor_name_from_content_is_agnostic_to_where_content_parts_splits</span>() {
+        <span class="kw">let</span> <span class="ident">alpha_1</span> <span class="op">=</span> <span class="ident">XorName</span>::<span class="ident">from_content</span>(<span class="kw-2">&amp;</span>[<span class="string">b&quot;abcdefg&quot;</span>, <span class="string">b&quot;hijk&quot;</span>]);
+        <span class="kw">let</span> <span class="ident">alpha_2</span> <span class="op">=</span> <span class="ident">XorName</span>::<span class="ident">from_content</span>(<span class="kw-2">&amp;</span>[<span class="string">b&quot;abcdefghijk&quot;</span>]);
+        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">alpha_1</span>, <span class="ident">alpha_2</span>);
     }
 
     <span class="comment">// Create a `XorName` with the 8 trailing bytes equal to `x` (in big endian order) and the rest</span>
