@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.2.0](https://github.com/maidsafe/xor_name/compare/v1.1.12...v1.2.0) (2021-04-19)
+
+
+### Features
+
+* Debug output with binary fmt as well ([1382403](https://github.com/maidsafe/xor_name/commit/1382403befe73de1961fcde8ec6cfa042dd36fb0))
+
 ### [1.1.12](https://github.com/maidsafe/xor_name/compare/v1.1.11...v1.1.12) (2021-03-03)
 
 ### [1.1.11](https://github.com/maidsafe/xor_name/compare/v1.1.10...v1.1.11) (2021-02-25)
