@@ -214,7 +214,11 @@ impl XorName {
 
 impl fmt::Debug for XorName {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        write!(formatter, "{}", self)
+        write!(
+            formatter,
+            "{:02x}{:02x}{:02x}({:08b})..",
+            self[0], self[1], self[2], self
+        )
     }
 }
 
@@ -378,12 +382,12 @@ mod tests {
     #[test]
     fn format_debug() {
         assert_eq!(
-            &format!(8, "{:?}", xor_name!(0x01, 0x23, 0x45, 0x67)),
-            "012345.."
+            &format!(18, "{:?}", xor_name!(0x01, 0x23, 0x45, 0x67)),
+            "012345(00000001).."
         );
         assert_eq!(
-            &format!(8, "{:?}", xor_name!(0x89, 0xab, 0xcd, 0xdf)),
-            "89abcd.."
+            &format!(18, "{:?}", xor_name!(0x89, 0xab, 0xcd, 0xdf)),
+            "89abcd(10001001).."
         );
     }
 
