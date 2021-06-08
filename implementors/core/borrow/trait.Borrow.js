@@ -1,3 +1,3 @@
 (function() {var implementors = {};
-implementors["xor_name"] = [{"text":"impl&lt;T&gt; Borrow&lt;Prefix&gt; for (Prefix, T)","synthetic":false,"types":[]}];
+implementors["xor_name"] = [{"text":"impl&lt;T&gt; <a class=\"trait\" href=\"https://doc.rust-lang.org/nightly/core/borrow/trait.Borrow.html\" title=\"trait core::borrow::Borrow\">Borrow</a>&lt;<a class=\"struct\" href=\"xor_name/struct.Prefix.html\" title=\"struct xor_name::Prefix\">Prefix</a>&gt; for <a class=\"primitive\" href=\"https://doc.rust-lang.org/nightly/std/primitive.tuple.html\">(</a><a class=\"struct\" href=\"xor_name/struct.Prefix.html\" title=\"struct xor_name::Prefix\">Prefix</a>, T<a class=\"primitive\" href=\"https://doc.rust-lang.org/nightly/std/primitive.tuple.html\">)</a>","synthetic":false,"types":["xor_name::prefix::Prefix"]}];
 if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()
