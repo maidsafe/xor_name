@@ -52,7 +52,6 @@
     missing_debug_implementations,
     variant_size_differences
 )]
-#![no_std]
 
 use core::{cmp::Ordering, fmt, ops};
 pub use prefix::Prefix;
@@ -96,6 +95,7 @@ macro_rules! format {
 }
 
 mod prefix;
+pub mod prefix_map;
 
 /// Constant byte length of `XorName`.
 pub const XOR_NAME_LEN: usize = 32;
