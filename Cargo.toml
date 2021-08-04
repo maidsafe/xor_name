@@ -19,6 +19,7 @@ rand_core = "0.5.1"
   [dependencies.rand]
   version = "~0.7.3"
   default-features = false
+  features = ["std"]
 
   [dependencies.serde]
   version = "1.0.113"
@@ -26,6 +27,7 @@ rand_core = "0.5.1"
   features = [ "derive" ]
 
 [dev-dependencies]
+rmp-serde = "0.15.5"
 bincode = "1.2.1"
 
   [dev-dependencies.arrayvec]
