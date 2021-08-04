@@ -8,13 +8,13 @@
 
 //! Container that acts as a map whose keys are prefixes.
 
+use crate::{Prefix, XorName};
 use serde::{Deserialize, Serialize};
 use std::{
     borrow::Borrow,
     cmp::Ordering,
     collections::{btree_set, BTreeSet},
 };
-use crate::{Prefix, XorName};
 
 /// Container that acts as a map whose keys are prefixes.
 ///
@@ -26,8 +26,6 @@ use crate::{Prefix, XorName};
 ///    covered by other prefixes, that entry is removed. For example, when there is entry with
 ///    prefix (00) and we insert entries with (000) and (001), the (00) prefix becomes fully
 ///    covered and is automatically removed.
-/// 3. It provides some additional lookup API for convenience (`get_equal_or_ancestor`,
-///    `get_matching`, ...)
 ///
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[allow(missing_debug_implementations)]
@@ -68,23 +66,6 @@ where
     /// Get the entry at `prefix`, if any.
     pub fn get(&self, prefix: &Prefix) -> Option<&T> {
         self.0.get(prefix).map(|entry| &entry.0)
-    }
-
-    /// Get the entry at `prefix` or any of its ancestors. In case of multiple matches, returns the
-    /// one with the longest prefix.
-    pub fn get_equal_or_ancestor(&self, prefix: &Prefix) -> Option<&T> {
-        let mut prefix = *prefix;
-        loop {
-            if let Some(entry) = self.get(&prefix) {
-                return Some(entry);
-            }
-
-            if prefix.is_empty() {
-                return None;
-            }
-
-            prefix = prefix.popped();
-        }
     }
 
     /// Get the entry at the prefix that matches `name`. In case of multiple matches, returns the
@@ -254,7 +235,6 @@ where
 mod tests {
     use super::*;
     use rand::Rng;
-    use xor_name::Prefix;
 
     #[test]
     fn insert_existing_prefix() {
@@ -319,36 +299,6 @@ mod tests {
         assert_eq!(map.insert((prefix("0"), 2)), Some((prefix("0"), 2)));
         assert_eq!(map.get(&prefix("0")), None);
         assert_eq!(map.get(&prefix("00")), Some(&(prefix("00"), 1)));
-    }
-
-    #[test]
-    fn get_equal_or_ancestor() {
-        let mut map = PrefixMap::new();
-        let _ = map.insert((prefix("0"), 0));
-        let _ = map.insert((prefix("10"), 1));
-
-        assert_eq!(
-            map.get_equal_or_ancestor(&prefix("0")),
-            Some(&(prefix("0"), 0))
-        );
-        assert_eq!(
-            map.get_equal_or_ancestor(&prefix("00")),
-            Some(&(prefix("0"), 0))
-        );
-        assert_eq!(
-            map.get_equal_or_ancestor(&prefix("01")),
-            Some(&(prefix("0"), 0))
-        );
-
-        assert_eq!(map.get_equal_or_ancestor(&prefix("1")), None);
-        assert_eq!(
-            map.get_equal_or_ancestor(&prefix("10")),
-            Some(&(prefix("10"), 1))
-        );
-        assert_eq!(
-            map.get_equal_or_ancestor(&prefix("100")),
-            Some(&(prefix("10"), 1))
-        );
     }
 
     #[test]
