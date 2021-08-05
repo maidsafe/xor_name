@@ -12,8 +12,7 @@ use crate::{Prefix, XorName};
 use serde::{Deserialize, Serialize};
 use std::{
     borrow::Borrow,
-    cmp::Ordering,
-    collections::{btree_set, BTreeSet},
+    collections::{btree_map, BTreeMap},
 };
 
 /// Container that acts as a map whose keys are prefixes.
@@ -30,7 +29,7 @@ use std::{
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[allow(missing_debug_implementations)]
 #[serde(transparent)]
-pub struct PrefixMap<T>(BTreeSet<Entry<T>>)
+pub struct PrefixMap<T>(BTreeMap<Prefix, T>)
 where
     T: Borrow<Prefix>;
 
@@ -55,15 +54,17 @@ where
             return false;
         }
 
-        let parent_prefix = entry.borrow().popped();
-        let _ = self.0.replace(Entry(entry));
+        let prefix = entry.borrow().clone();
+        let _ = self.0.insert(prefix, entry);
+
+        let parent_prefix = prefix.popped();
         self.prune(parent_prefix);
         true
     }
 
     /// Get the entry at `prefix`, if any.
     pub fn get(&self, prefix: &Prefix) -> Option<&T> {
-        self.0.get(prefix).map(|entry| &entry.0)
+        self.0.get(prefix)
     }
 
     /// Get the entry at the prefix that matches `name`. In case of multiple matches, returns the
@@ -71,14 +72,21 @@ where
     pub fn get_matching(&self, name: &XorName) -> Option<&T> {
         self.0
             .iter()
-            .filter(|entry| entry.prefix().matches(name))
-            .max_by_key(|entry| entry.prefix().bit_count())
-            .map(|entry| &entry.0)
+            .filter(|(prefix, _)| prefix.matches(name))
+            .max_by_key(|(prefix, _)| prefix.bit_count())
+            .map(|(_, entry)| entry)
+    }
+
+    /// Get the entry at the prefix that matches `prefix`. In case of multiple matches, returns the
+    /// one with the longest prefix.
+    pub fn get_matching_prefix(&self, prefix: &Prefix) -> Option<&T> {
+        self.get_matching(&prefix.name())
     }
 
     /// Returns an iterator over the entries, in order by prefixes.
+    // TODO check if really ordered
     pub fn iter(&self) -> impl Iterator<Item = &T> + Clone {
-        self.0.iter().map(|entry| &entry.0)
+        self.0.iter().map(|(_, entry)| entry)
     }
 
     /// Returns an iterator over all entries whose prefixes are descendants (extensions) of
@@ -87,16 +95,18 @@ where
         &'a self,
         prefix: &'a Prefix,
     ) -> impl Iterator<Item = &'a T> + Clone + 'a {
-        // TODO: there might be a way to do this in O(logn) using BTreeSet::range
+        // TODO: there might be a way to do this in O(logn) using BTreeMap::range
+        // self.0
+        //     .range(prefix..)
         self.0
             .iter()
-            .filter(move |entry| entry.0.borrow().is_extension_of(prefix))
-            .map(|entry| &entry.0)
+            .filter(move |(p, _)| p.is_extension_of(prefix))
+            .map(|(_, entry)| entry)
     }
 
-    // Remove `prefix` and any of its ancestors if they are covered by their descendants.
-    // For example, if `(00)` and `(01)` are both in the map, we can remove `(0)` and `()`.
-    fn prune(&mut self, mut prefix: Prefix) {
+    /// Remove `prefix` and any of its ancestors if they are covered by their descendants.
+    /// For example, if `(00)` and `(01)` are both in the map, we can remove `(0)` and `()`.
+    pub fn prune(&mut self, mut prefix: Prefix) {
         // TODO: can this be optimized?
 
         loop {
@@ -142,12 +152,12 @@ where
 
 impl<T> Eq for PrefixMap<T> where T: Borrow<Prefix> + Eq {}
 
-impl<T> From<PrefixMap<T>> for BTreeSet<T>
+impl<T> From<PrefixMap<T>> for BTreeMap<Prefix, T>
 where
     T: Borrow<Prefix> + Ord,
 {
     fn from(map: PrefixMap<T>) -> Self {
-        map.0.into_iter().map(|entry| entry.0).collect()
+        map.0
     }
 }
 
@@ -167,65 +177,13 @@ where
 ///
 /// This struct is created by [`PrefixMap::into_iter`].
 #[derive(Debug)]
-pub struct IntoIter<T>(btree_set::IntoIter<Entry<T>>);
+pub struct IntoIter<T>(btree_map::IntoIter<Prefix, T>);
 
 impl<T> Iterator for IntoIter<T> {
     type Item = T;
 
     fn next(&mut self) -> Option<Self::Item> {
-        self.0.next().map(|entry| entry.0)
-    }
-}
-
-// Wrapper for entries of `PrefixMap` which implements Eq, Ord by delegating them to the prefix.
-#[derive(Clone, Debug, Serialize, Deserialize)]
-#[serde(transparent)]
-struct Entry<T>(T);
-
-impl<T> Entry<T>
-where
-    T: Borrow<Prefix>,
-{
-    fn prefix(&self) -> &Prefix {
-        self.0.borrow()
-    }
-}
-
-impl<T> Borrow<Prefix> for Entry<T>
-where
-    T: Borrow<Prefix>,
-{
-    fn borrow(&self) -> &Prefix {
-        self.0.borrow()
-    }
-}
-
-impl<T> PartialEq for Entry<T>
-where
-    T: Borrow<Prefix>,
-{
-    fn eq(&self, other: &Self) -> bool {
-        self.0.borrow().eq(other.0.borrow())
-    }
-}
-
-impl<T> Eq for Entry<T> where T: Borrow<Prefix> {}
-
-impl<T> Ord for Entry<T>
-where
-    T: Borrow<Prefix>,
-{
-    fn cmp(&self, other: &Self) -> Ordering {
-        self.0.borrow().cmp(other.0.borrow())
-    }
-}
-
-impl<T> PartialOrd for Entry<T>
-where
-    T: Borrow<Prefix>,
-{
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(self.cmp(other))
+        self.0.next().map(|(_, entry)| entry)
     }
 }
 
@@ -233,6 +191,7 @@ where
 mod tests {
     use super::*;
     use rand::Rng;
+    use eyre::Result;
 
     #[test]
     fn insert_existing_prefix() {
@@ -325,20 +284,49 @@ mod tests {
     }
 
     #[test]
-    fn serialize_transparent() {
+    fn get_matching_prefix() {
         let mut map = PrefixMap::new();
         let _ = map.insert((prefix("0"), 0));
         let _ = map.insert((prefix("1"), 1));
         let _ = map.insert((prefix("10"), 10));
 
-        let set: BTreeSet<_> = map.clone().into_iter().collect();
-        let serialized_set = rmp_serde::to_vec(&set).unwrap();
+        assert_eq!(
+            map.get_matching_prefix(&prefix("0")),
+            Some(&(prefix("0"), 0))
+        );
 
-        assert_eq!(rmp_serde::to_vec(&map).unwrap(), serialized_set);
-        let _ = rmp_serde::from_read::<_, PrefixMap<(Prefix, i32)>>(&*serialized_set).unwrap();
+        assert_eq!(
+            map.get_matching_prefix(&prefix("11")),
+            Some(&(prefix("1"), 1))
+        );
+
+        assert_eq!(
+            map.get_matching_prefix(&prefix("10")),
+            Some(&(prefix("10"), 10))
+        );
+
+        assert_eq!(
+            map.get_matching_prefix(&prefix("101")),
+            Some(&(prefix("10"), 10))
+        );
+    }
+
+    #[test]
+    fn serialize_transparent() -> Result<()> {
+        let mut map = PrefixMap::new();
+        let _ = map.insert((prefix("0"), 0));
+        let _ = map.insert((prefix("1"), 1));
+        let _ = map.insert((prefix("10"), 10));
+
+        let copy_map: BTreeMap<_, _> = map.clone().0.into_iter().collect();
+        let serialized_copy_map = rmp_serde::to_vec(&copy_map)?;
+
+        assert_eq!(rmp_serde::to_vec(&map)?, serialized_copy_map);
+        let _ = rmp_serde::from_read::<_, PrefixMap<(Prefix, i32)>>(&*serialized_copy_map)?;
+        Ok(())
     }
 
     fn prefix(s: &str) -> Prefix {
-        s.parse().unwrap()
+        s.parse().expect("")
     }
 }
