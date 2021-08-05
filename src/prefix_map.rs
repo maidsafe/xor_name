@@ -54,7 +54,7 @@ where
             return false;
         }
 
-        let prefix = entry.borrow().clone();
+        let prefix = *entry.borrow();
         let _ = self.0.insert(prefix, entry);
 
         let parent_prefix = prefix.popped();
@@ -84,7 +84,6 @@ where
     }
 
     /// Returns an iterator over the entries, in order by prefixes.
-    // TODO check if really ordered
     pub fn iter(&self) -> impl Iterator<Item = &T> + Clone {
         self.0.iter().map(|(_, entry)| entry)
     }
@@ -190,8 +189,8 @@ impl<T> Iterator for IntoIter<T> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use rand::Rng;
     use eyre::Result;
+    use rand::Rng;
 
     #[test]
     fn insert_existing_prefix() {
@@ -309,6 +308,20 @@ mod tests {
             map.get_matching_prefix(&prefix("101")),
             Some(&(prefix("10"), 10))
         );
+    }
+
+    #[test]
+    fn test_iter() {
+        let mut map = PrefixMap::new();
+        let _ = map.insert((prefix("10"), 10));
+        let _ = map.insert((prefix("11"), 11));
+        let _ = map.insert((prefix("0"), 0));
+
+        let mut it = map.iter();
+        assert_eq!(it.next(), Some(&(prefix("0"), 0)));
+        assert_eq!(it.next(), Some(&(prefix("10"), 10)));
+        assert_eq!(it.next(), Some(&(prefix("11"), 11)));
+        assert_eq!(it.next(), None);
     }
 
     #[test]
