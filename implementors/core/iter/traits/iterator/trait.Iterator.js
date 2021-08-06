@@ -1,0 +1,3 @@
+(function() {var implementors = {};
+implementors["xor_name"] = [{"text":"impl&lt;T&gt; <a class=\"trait\" href=\"https://doc.rust-lang.org/1.54.0/core/iter/traits/iterator/trait.Iterator.html\" title=\"trait core::iter::traits::iterator::Iterator\">Iterator</a> for <a class=\"struct\" href=\"xor_name/prefix_map/struct.IntoIter.html\" title=\"struct xor_name::prefix_map::IntoIter\">IntoIter</a>&lt;T&gt;","synthetic":false,"types":["xor_name::prefix_map::IntoIter"]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

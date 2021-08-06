@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["IntoIter","An owning iterator over the values of a [`PrefixMap`]."],["PrefixMap","Container that acts as a map whose keys are prefixes."]]});
