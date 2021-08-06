@@ -571,17 +571,17 @@ mod tests {
 
     #[test]
     fn bit() {
-        assert_eq!(false, xor_name!(0b00101000).bit(0));
-        assert_eq!(true, xor_name!(0b00101000).bit(2));
-        assert_eq!(false, xor_name!(0b00101000).bit(3));
-        assert_eq!(true, xor_name!(2, 128, 1, 0).bit(6));
-        assert_eq!(true, xor_name!(2, 128, 1, 0).bit(8));
-        assert_eq!(true, xor_name!(2, 128, 1, 0).bit(23));
-        assert_eq!(false, xor_name!(2, 128, 1, 0).bit(5));
-        assert_eq!(false, xor_name!(2, 128, 1, 0).bit(7));
-        assert_eq!(false, xor_name!(2, 128, 1, 0).bit(9));
-        assert_eq!(false, xor_name!(2, 128, 1, 0).bit(22));
-        assert_eq!(false, xor_name!(2, 128, 1, 0).bit(24));
+        assert!(!xor_name!(0b00101000).bit(0));
+        assert!(xor_name!(0b00101000).bit(2));
+        assert!(!xor_name!(0b00101000).bit(3));
+        assert!(xor_name!(2, 128, 1, 0).bit(6));
+        assert!(xor_name!(2, 128, 1, 0).bit(8));
+        assert!(xor_name!(2, 128, 1, 0).bit(23));
+        assert!(!xor_name!(2, 128, 1, 0).bit(7));
+        assert!(!xor_name!(2, 128, 1, 0).bit(9));
+        assert!(!xor_name!(2, 128, 1, 0).bit(5));
+        assert!(!xor_name!(2, 128, 1, 0).bit(22));
+        assert!(!xor_name!(2, 128, 1, 0).bit(24));
     }
 
     #[test]
