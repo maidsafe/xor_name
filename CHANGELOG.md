@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.3.0](https://github.com/maidsafe/xor_name/compare/v1.2.1...v1.3.0) (2021-08-06)
+
+
+### Features
+
+* insert returns bool ([7e36f9d](https://github.com/maidsafe/xor_name/commit/7e36f9dfeb49765b281625f07ec64fd320c666d2))
+* prefix map ([83be995](https://github.com/maidsafe/xor_name/commit/83be99545a3dda1fdb9d0c13a9d18a757bec8538))
+* remove get_equal_or_ancestor ([4c2c7ed](https://github.com/maidsafe/xor_name/commit/4c2c7ed40db22f14a8548d8bb6e36589a0111165))
+* use BTreeMap add get_matching_prefix make prune pub ([069767c](https://github.com/maidsafe/xor_name/commit/069767ce0e98a86e9b04f8efa2c91225968e022d))
+
 ### [1.2.1](https://github.com/maidsafe/xor_name/compare/v1.2.0...v1.2.1) (2021-06-08)
 
 ## [1.2.0](https://github.com/maidsafe/xor_name/compare/v1.1.12...v1.2.0) (2021-04-19)
