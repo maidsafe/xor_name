@@ -195,25 +195,25 @@ mod tests {
     #[test]
     fn insert_existing_prefix() {
         let mut map = PrefixMap::new();
-        assert_eq!(map.insert((prefix("0"), 1)), true);
-        assert_eq!(map.insert((prefix("0"), 2)), true);
+        assert!(map.insert((prefix("0"), 1)));
+        assert!(map.insert((prefix("0"), 2)));
         assert_eq!(map.get(&prefix("0")), Some(&(prefix("0"), 2)));
     }
 
     #[test]
     fn insert_direct_descendants_of_existing_prefix() {
         let mut map = PrefixMap::new();
-        assert_eq!(map.insert((prefix("0"), 0)), true);
+        assert!(map.insert((prefix("0"), 0)));
 
         // Insert the first sibling. Parent remain in the map.
-        assert_eq!(map.insert((prefix("00"), 1)), true);
+        assert!(map.insert((prefix("00"), 1)));
         assert_eq!(map.get(&prefix("00")), Some(&(prefix("00"), 1)));
         assert_eq!(map.get(&prefix("01")), None);
         assert_eq!(map.get(&prefix("0")), Some(&(prefix("0"), 0)));
 
         // Insert the other sibling. Parent is removed because it is now fully covered by its
         // descendants.
-        assert_eq!(map.insert((prefix("01"), 2)), true);
+        assert!(map.insert((prefix("01"), 2)));
         assert_eq!(map.get(&prefix("00")), Some(&(prefix("00"), 1)));
         assert_eq!(map.get(&prefix("01")), Some(&(prefix("01"), 2)));
         assert_eq!(map.get(&prefix("0")), None);
@@ -222,23 +222,23 @@ mod tests {
     #[test]
     fn insert_indirect_descendants_of_existing_prefix() {
         let mut map = PrefixMap::new();
-        assert_eq!(map.insert((prefix("0"), 0)), true);
+        assert!(map.insert((prefix("0"), 0)));
 
-        assert_eq!(map.insert((prefix("000"), 1)), true);
+        assert!(map.insert((prefix("000"), 1)));
         assert_eq!(map.get(&prefix("000")), Some(&(prefix("000"), 1)));
         assert_eq!(map.get(&prefix("001")), None);
         assert_eq!(map.get(&prefix("00")), None);
         assert_eq!(map.get(&prefix("01")), None);
         assert_eq!(map.get(&prefix("0")), Some(&(prefix("0"), 0)));
 
-        assert_eq!(map.insert((prefix("001"), 2)), true);
+        assert!(map.insert((prefix("001"), 2)));
         assert_eq!(map.get(&prefix("000")), Some(&(prefix("000"), 1)));
         assert_eq!(map.get(&prefix("001")), Some(&(prefix("001"), 2)));
         assert_eq!(map.get(&prefix("00")), None);
         assert_eq!(map.get(&prefix("01")), None);
         assert_eq!(map.get(&prefix("0")), Some(&(prefix("0"), 0)));
 
-        assert_eq!(map.insert((prefix("01"), 3)), true);
+        assert!(map.insert((prefix("01"), 3)));
         assert_eq!(map.get(&prefix("000")), Some(&(prefix("000"), 1)));
         assert_eq!(map.get(&prefix("001")), Some(&(prefix("001"), 2)));
         assert_eq!(map.get(&prefix("00")), None);
@@ -252,7 +252,7 @@ mod tests {
         let mut map = PrefixMap::new();
         let _ = map.insert((prefix("00"), 1));
 
-        assert_eq!(map.insert((prefix("0"), 2)), false);
+        assert!(!map.insert((prefix("0"), 2)));
         assert_eq!(map.get(&prefix("0")), None);
         assert_eq!(map.get(&prefix("00")), Some(&(prefix("00"), 1)));
     }
