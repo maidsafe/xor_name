@@ -9,7 +9,6 @@
 
 use crate::{XorName, XOR_NAME_LEN};
 use core::{
-    borrow::Borrow,
     cmp::{self, Ordering},
     fmt::{Binary, Debug, Display, Formatter, Result as FmtResult},
     hash::{Hash, Hasher},
@@ -278,12 +277,6 @@ impl Binary for Prefix {
 impl Debug for Prefix {
     fn fmt(&self, formatter: &mut Formatter) -> FmtResult {
         write!(formatter, "Prefix({:b})", self)
-    }
-}
-
-impl<T> Borrow<Prefix> for (Prefix, T) {
-    fn borrow(&self) -> &Prefix {
-        &self.0
     }
 }
 
