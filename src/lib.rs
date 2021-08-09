@@ -55,6 +55,7 @@
 
 use core::{cmp::Ordering, fmt, ops};
 pub use prefix::Prefix;
+pub use prefix_map::PrefixMap;
 use rand::{
     distributions::{Distribution, Standard},
     rngs::OsRng,
@@ -95,7 +96,7 @@ macro_rules! format {
 }
 
 mod prefix;
-pub mod prefix_map;
+mod prefix_map;
 
 /// Constant byte length of `XorName`.
 pub const XOR_NAME_LEN: usize = 32;
