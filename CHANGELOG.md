@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.0.0](https://github.com/maidsafe/xor_name/compare/v1.3.0...v2.0.0) (2021-08-10)
+
+
+### ⚠ BREAKING CHANGES
+
+* **prefix-map:**  - Expose PrefixMap as public from lib and remove pub prefix_map mod.
+ - Adapting PrefixMap APIs to the removal of requirement of Borrow<Prefix> Trait for T.
+
+* **prefix-map:** remove the requirement of Borrow<Prefix> trait for T from PrefixMap ([1e32830](https://github.com/maidsafe/xor_name/commit/1e32830af72ae37f58a9961b8a0c8dde0981b0e0))
+
 ## [1.3.0](https://github.com/maidsafe/xor_name/compare/v1.2.1...v1.3.0) (2021-08-06)
 
 
