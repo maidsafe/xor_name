@@ -74,7 +74,7 @@ where
         self.get_matching(&prefix.name())
     }
 
-    /// Returns an iterator over the entries
+    /// Returns an owning iterator over the entries
     pub fn iter(&self) -> impl Iterator<Item = (Prefix, T)> + '_ {
         self.0
             .iter()
