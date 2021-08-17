@@ -9,12 +9,8 @@
 //! Container that acts as a map whose keys are Prefixes.
 
 use crate::{Prefix, XorName};
+use dashmap::{self, DashMap};
 use serde::{Deserialize, Serialize};
-use dashmap::{
-    self,
-    DashMap,
-};
-use std::iter::FromIterator;
 
 /// Container that acts as a map whose keys are prefixes.
 ///
@@ -28,7 +24,8 @@ use std::iter::FromIterator;
 pub struct PrefixMap<T>(DashMap<Prefix, T>);
 
 impl<T> PrefixMap<T>
-where T: Clone
+where
+    T: Clone,
 {
     /// Create empty `PrefixMap`.
     pub fn new() -> Self {
@@ -57,17 +54,18 @@ where T: Clone
     /// Get the entry at `prefix`, if any.
     pub fn get(&self, prefix: &Prefix) -> Option<(Prefix, T)> {
         let entry = self.0.get(prefix)?;
-        Some((entry.key().clone(), entry.value().clone()))
+        Some((*entry.key(), entry.value().clone()))
     }
 
     /// Get the entry at the prefix that matches `name`. In case of multiple matches, returns the
     /// one with the longest prefix.
     pub fn get_matching(&self, name: &XorName) -> Option<(Prefix, T)> {
-        let max = self.0
+        let max = self
+            .0
             .iter()
             .filter(|item| item.key().matches(name))
             .max_by_key(|item| item.key().bit_count())?;
-        Some((max.key().clone(), max.value().clone()))
+        Some((*max.key(), max.value().clone()))
     }
 
     /// Get the entry at the prefix that matches `prefix`. In case of multiple matches, returns the
@@ -77,20 +75,19 @@ where T: Clone
     }
 
     /// Returns an iterator over the entries
-    pub fn iter<'a>(&'a self) -> impl Iterator<Item = (Prefix, T)> + 'a {
-        self.0.iter().map(|item| (item.key().clone(), item.value().clone()))
+    pub fn iter(&self) -> impl Iterator<Item = (Prefix, T)> + '_ {
+        self.0
+            .iter()
+            .map(|item| (*item.key(), item.value().clone()))
     }
 
     /// Returns an iterator over all entries whose prefixes are descendants (extensions) of
     /// `prefix`.
-    pub fn descendants<'a>(
-        &'a self,
-        prefix: &'a Prefix,
-    ) -> impl Iterator<Item = (Prefix, T)> + 'a {
+    pub fn descendants<'a>(&'a self, prefix: &'a Prefix) -> impl Iterator<Item = (Prefix, T)> + 'a {
         self.0
             .iter()
             .filter(move |item| item.key().is_extension_of(prefix))
-            .map(move |item| (item.key().clone(), item.value().clone()))
+            .map(move |item| (*item.key(), item.value().clone()))
     }
 
     /// Remove `prefix` and any of its ancestors if they are covered by their descendants.
@@ -99,8 +96,9 @@ where T: Clone
         // TODO: can this be optimized?
 
         loop {
-            let descendants = Vec::from_iter(self.descendants(&prefix));
-            let descendant_prefixes: Vec<&Prefix> = descendants.iter().map(|(prefix, _)| prefix).collect();
+            let descendants: Vec<_> = self.descendants(&prefix).collect();
+            let descendant_prefixes: Vec<&Prefix> =
+                descendants.iter().map(|(prefix, _)| prefix).collect();
             if prefix.is_covered_by(descendant_prefixes) {
                 let _ = self.0.remove(&prefix);
             }
@@ -126,7 +124,7 @@ impl<T> Default for PrefixMap<T> {
 // compares only the prefixes.
 impl<T> PartialEq for PrefixMap<T>
 where
-    T: PartialEq
+    T: PartialEq,
 {
     fn eq(&self, other: &Self) -> bool {
         self.0.len() == other.0.len()
