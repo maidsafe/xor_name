@@ -10,7 +10,11 @@
 
 use crate::{Prefix, XorName};
 use serde::{Deserialize, Serialize};
-use std::collections::{btree_map, BTreeMap};
+use dashmap::{
+    self,
+    DashMap,
+};
+use std::iter::FromIterator;
 
 /// Container that acts as a map whose keys are prefixes.
 ///
@@ -21,9 +25,11 @@ use std::collections::{btree_map, BTreeMap};
 ///
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(transparent)]
-pub struct PrefixMap<T>(BTreeMap<Prefix, T>);
+pub struct PrefixMap<T>(DashMap<Prefix, T>);
 
-impl<T> PrefixMap<T> {
+impl<T> PrefixMap<T>
+where T: Clone
+{
     /// Create empty `PrefixMap`.
     pub fn new() -> Self {
         Self::default()
@@ -49,28 +55,30 @@ impl<T> PrefixMap<T> {
     }
 
     /// Get the entry at `prefix`, if any.
-    pub fn get(&self, prefix: &Prefix) -> Option<(&Prefix, &T)> {
-        self.0.get_key_value(prefix)
+    pub fn get(&self, prefix: &Prefix) -> Option<(Prefix, T)> {
+        let entry = self.0.get(prefix)?;
+        Some((entry.key().clone(), entry.value().clone()))
     }
 
     /// Get the entry at the prefix that matches `name`. In case of multiple matches, returns the
     /// one with the longest prefix.
-    pub fn get_matching(&self, name: &XorName) -> Option<(&Prefix, &T)> {
-        self.0
+    pub fn get_matching(&self, name: &XorName) -> Option<(Prefix, T)> {
+        let max = self.0
             .iter()
-            .filter(|(prefix, _)| prefix.matches(name))
-            .max_by_key(|(prefix, _)| prefix.bit_count())
+            .filter(|item| item.key().matches(name))
+            .max_by_key(|item| item.key().bit_count())?;
+        Some((max.key().clone(), max.value().clone()))
     }
 
     /// Get the entry at the prefix that matches `prefix`. In case of multiple matches, returns the
     /// one with the longest prefix.
-    pub fn get_matching_prefix(&self, prefix: &Prefix) -> Option<(&Prefix, &T)> {
+    pub fn get_matching_prefix(&self, prefix: &Prefix) -> Option<(Prefix, T)> {
         self.get_matching(&prefix.name())
     }
 
-    /// Returns an iterator over the entries, in order by prefixes.
-    pub fn iter(&self) -> impl Iterator<Item = (&Prefix, &T)> + Clone {
-        self.0.iter()
+    /// Returns an iterator over the entries
+    pub fn iter<'a>(&'a self) -> impl Iterator<Item = (Prefix, T)> + 'a {
+        self.0.iter().map(|item| (item.key().clone(), item.value().clone()))
     }
 
     /// Returns an iterator over all entries whose prefixes are descendants (extensions) of
@@ -78,22 +86,22 @@ impl<T> PrefixMap<T> {
     pub fn descendants<'a>(
         &'a self,
         prefix: &'a Prefix,
-    ) -> impl Iterator<Item = (&'a Prefix, &'a T)> + Clone + 'a {
-        // TODO: there might be a way to do this in O(logn) using BTreeMap::range
-        // self.0
-        //     .range(prefix..)
+    ) -> impl Iterator<Item = (Prefix, T)> + 'a {
         self.0
             .iter()
-            .filter(move |(p, _)| p.is_extension_of(prefix))
+            .filter(move |item| item.key().is_extension_of(prefix))
+            .map(move |item| (item.key().clone(), item.value().clone()))
     }
 
     /// Remove `prefix` and any of its ancestors if they are covered by their descendants.
     /// For example, if `(00)` and `(01)` are both in the map, we can remove `(0)` and `()`.
-    pub fn prune(&mut self, mut prefix: Prefix) {
+    pub fn prune(&self, mut prefix: Prefix) {
         // TODO: can this be optimized?
 
         loop {
-            if prefix.is_covered_by(self.descendants(&prefix).map(|(prefix, _)| prefix)) {
+            let descendants = Vec::from_iter(self.descendants(&prefix));
+            let descendant_prefixes: Vec<&Prefix> = descendants.iter().map(|(prefix, _)| prefix).collect();
+            if prefix.is_covered_by(descendant_prefixes) {
                 let _ = self.0.remove(&prefix);
             }
 
@@ -118,7 +126,7 @@ impl<T> Default for PrefixMap<T> {
 // compares only the prefixes.
 impl<T> PartialEq for PrefixMap<T>
 where
-    T: PartialEq,
+    T: PartialEq
 {
     fn eq(&self, other: &Self) -> bool {
         self.0.len() == other.0.len()
@@ -126,13 +134,13 @@ where
                 .0
                 .iter()
                 .zip(other.0.iter())
-                .all(|(lhs, rhs)| lhs.0 == rhs.0)
+                .all(|(lhs, rhs)| lhs.pair() == rhs.pair())
     }
 }
 
 impl<T> Eq for PrefixMap<T> where T: Eq {}
 
-impl<T> From<PrefixMap<T>> for BTreeMap<Prefix, T> {
+impl<T> From<PrefixMap<T>> for DashMap<Prefix, T> {
     fn from(map: PrefixMap<T>) -> Self {
         map.0
     }
@@ -140,20 +148,19 @@ impl<T> From<PrefixMap<T>> for BTreeMap<Prefix, T> {
 
 impl<T> IntoIterator for PrefixMap<T> {
     type Item = T;
-    type IntoIter = IntoIter<T>;
+    type IntoIter = PrefixMapIterator<T>;
 
     fn into_iter(self) -> Self::IntoIter {
-        IntoIter(self.0.into_iter())
+        PrefixMapIterator(self.0.into_iter())
     }
 }
 
 /// An owning iterator over the values of a [`PrefixMap`].
 ///
 /// This struct is created by [`PrefixMap::into_iter`].
-#[derive(Debug)]
-pub struct IntoIter<T>(btree_map::IntoIter<Prefix, T>);
+pub struct PrefixMapIterator<T>(dashmap::iter::OwningIter<Prefix, T>);
 
-impl<T> Iterator for IntoIter<T> {
+impl<T> Iterator for PrefixMapIterator<T> {
     type Item = T;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -172,7 +179,7 @@ mod tests {
         let mut map = PrefixMap::new();
         assert!(map.insert(prefix("0"), 1));
         assert!(map.insert(prefix("0"), 2));
-        assert_eq!(map.get(&prefix("0")), Some((&prefix("0"), &2)));
+        assert_eq!(map.get(&prefix("0")), Some((prefix("0"), 2)));
     }
 
     #[test]
@@ -182,15 +189,15 @@ mod tests {
 
         // Insert the first sibling. Parent remain in the map.
         assert!(map.insert(prefix("00"), 1));
-        assert_eq!(map.get(&prefix("00")), Some((&prefix("00"), &1)));
+        assert_eq!(map.get(&prefix("00")), Some((prefix("00"), 1)));
         assert_eq!(map.get(&prefix("01")), None);
-        assert_eq!(map.get(&prefix("0")), Some((&prefix("0"), &0)));
+        assert_eq!(map.get(&prefix("0")), Some((prefix("0"), 0)));
 
         // Insert the other sibling. Parent is removed because it is now fully covered by its
         // descendants.
         assert!(map.insert(prefix("01"), 2));
-        assert_eq!(map.get(&prefix("00")), Some((&prefix("00"), &1)));
-        assert_eq!(map.get(&prefix("01")), Some((&prefix("01"), &2)));
+        assert_eq!(map.get(&prefix("00")), Some((prefix("00"), 1)));
+        assert_eq!(map.get(&prefix("01")), Some((prefix("01"), 2)));
         assert_eq!(map.get(&prefix("0")), None);
     }
 
@@ -200,24 +207,24 @@ mod tests {
         assert!(map.insert(prefix("0"), 0));
 
         assert!(map.insert(prefix("000"), 1));
-        assert_eq!(map.get(&prefix("000")), Some((&prefix("000"), &1)));
+        assert_eq!(map.get(&prefix("000")), Some((prefix("000"), 1)));
         assert_eq!(map.get(&prefix("001")), None);
         assert_eq!(map.get(&prefix("00")), None);
         assert_eq!(map.get(&prefix("01")), None);
-        assert_eq!(map.get(&prefix("0")), Some((&prefix("0"), &0)));
+        assert_eq!(map.get(&prefix("0")), Some((prefix("0"), 0)));
 
         assert!(map.insert(prefix("001"), 2));
-        assert_eq!(map.get(&prefix("000")), Some((&prefix("000"), &1)));
-        assert_eq!(map.get(&prefix("001")), Some((&prefix("001"), &2)));
+        assert_eq!(map.get(&prefix("000")), Some((prefix("000"), 1)));
+        assert_eq!(map.get(&prefix("001")), Some((prefix("001"), 2)));
         assert_eq!(map.get(&prefix("00")), None);
         assert_eq!(map.get(&prefix("01")), None);
-        assert_eq!(map.get(&prefix("0")), Some((&prefix("0"), &0)));
+        assert_eq!(map.get(&prefix("0")), Some((prefix("0"), 0)));
 
         assert!(map.insert(prefix("01"), 3));
-        assert_eq!(map.get(&prefix("000")), Some((&prefix("000"), &1)));
-        assert_eq!(map.get(&prefix("001")), Some((&prefix("001"), &2)));
+        assert_eq!(map.get(&prefix("000")), Some((prefix("000"), 1)));
+        assert_eq!(map.get(&prefix("001")), Some((prefix("001"), 2)));
         assert_eq!(map.get(&prefix("00")), None);
-        assert_eq!(map.get(&prefix("01")), Some((&prefix("01"), &3)));
+        assert_eq!(map.get(&prefix("01")), Some((prefix("01"), 3)));
         // (0) is now fully covered and so was removed
         assert_eq!(map.get(&prefix("0")), None);
     }
@@ -229,7 +236,7 @@ mod tests {
 
         assert!(!map.insert(prefix("0"), 2));
         assert_eq!(map.get(&prefix("0")), None);
-        assert_eq!(map.get(&prefix("00")), Some((&prefix("00"), &1)));
+        assert_eq!(map.get(&prefix("00")), Some((prefix("00"), 1)));
     }
 
     #[test]
@@ -243,17 +250,17 @@ mod tests {
 
         assert_eq!(
             map.get_matching(&prefix("0").substituted_in(rng.gen())),
-            Some((&prefix("0"), &0))
+            Some((prefix("0"), 0))
         );
 
         assert_eq!(
             map.get_matching(&prefix("11").substituted_in(rng.gen())),
-            Some((&prefix("1"), &1))
+            Some((prefix("1"), 1))
         );
 
         assert_eq!(
             map.get_matching(&prefix("10").substituted_in(rng.gen())),
-            Some((&prefix("10"), &10))
+            Some((prefix("10"), 10))
         );
     }
 
@@ -266,37 +273,23 @@ mod tests {
 
         assert_eq!(
             map.get_matching_prefix(&prefix("0")),
-            Some((&prefix("0"), &0))
+            Some((prefix("0"), 0))
         );
 
         assert_eq!(
             map.get_matching_prefix(&prefix("11")),
-            Some((&prefix("1"), &1))
+            Some((prefix("1"), 1))
         );
 
         assert_eq!(
             map.get_matching_prefix(&prefix("10")),
-            Some((&prefix("10"), &10))
+            Some((prefix("10"), 10))
         );
 
         assert_eq!(
             map.get_matching_prefix(&prefix("101")),
-            Some((&prefix("10"), &10))
+            Some((prefix("10"), 10))
         );
-    }
-
-    #[test]
-    fn test_iter() {
-        let mut map = PrefixMap::new();
-        let _ = map.insert(prefix("10"), 10);
-        let _ = map.insert(prefix("11"), 11);
-        let _ = map.insert(prefix("0"), 0);
-
-        let mut it = map.iter();
-        assert_eq!(it.next(), Some((&prefix("0"), &0)));
-        assert_eq!(it.next(), Some((&prefix("10"), &10)));
-        assert_eq!(it.next(), Some((&prefix("11"), &11)));
-        assert_eq!(it.next(), None);
     }
 
     #[test]
@@ -306,7 +299,7 @@ mod tests {
         let _ = map.insert(prefix("1"), 1);
         let _ = map.insert(prefix("10"), 10);
 
-        let copy_map: BTreeMap<_, _> = map.clone().into();
+        let copy_map: DashMap<_, _> = map.clone().into();
         let serialized_copy_map = rmp_serde::to_vec(&copy_map)?;
 
         assert_eq!(rmp_serde::to_vec(&map)?, serialized_copy_map);
