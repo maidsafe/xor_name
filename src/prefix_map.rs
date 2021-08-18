@@ -126,7 +126,7 @@ where
                 .0
                 .iter()
                 .zip(other.0.iter())
-                .all(|(lhs, rhs)| lhs.0 == rhs.0)
+                .all(|(lhs, rhs)| lhs == rhs)
     }
 }
 
@@ -173,6 +173,27 @@ mod tests {
         assert!(map.insert(prefix("0"), 1));
         assert!(map.insert(prefix("0"), 2));
         assert_eq!(map.get(&prefix("0")), Some((&prefix("0"), &2)));
+    }
+
+    #[test]
+    fn test_eq() {
+        let mut map = PrefixMap::new();
+        assert!(map.insert(prefix("0"), 1));
+        assert!(map.insert(prefix("01"), 2));
+        let mut map2 = PrefixMap::new();
+        assert!(map2.insert(prefix("0"), 1));
+        assert!(map2.insert(prefix("01"), 2));
+        assert_eq!(map, map2);
+
+        let mut map3 = PrefixMap::new();
+        assert!(map3.insert(prefix("0"), 1));
+        assert!(map3.insert(prefix("01"), 3));
+        assert_ne!(map, map3);
+
+        let mut map4 = PrefixMap::new();
+        assert!(map4.insert(prefix("0"), 1));
+        assert!(map4.insert(prefix("00"), 2));
+        assert_ne!(map, map4);
     }
 
     #[test]
