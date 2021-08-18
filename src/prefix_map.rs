@@ -9,8 +9,9 @@
 //! Container that acts as a map whose keys are Prefixes.
 
 use crate::{Prefix, XorName};
-use dashmap::{self, DashMap};
+use dashmap::{self, mapref::multiple::RefMulti, DashMap};
 use serde::{Deserialize, Serialize};
+use std::iter::Iterator;
 
 /// Container that acts as a map whose keys are prefixes.
 ///
@@ -53,8 +54,9 @@ where
 
     /// Get the entry at `prefix`, if any.
     pub fn get(&self, prefix: &Prefix) -> Option<(Prefix, T)> {
-        let entry = self.0.get(prefix)?;
-        Some((*entry.key(), entry.value().clone()))
+        self.0
+            .get(prefix)
+            .map(|entry| (*entry.key(), entry.value().clone()))
     }
 
     /// Get the entry at the prefix that matches `name`. In case of multiple matches, returns the
@@ -75,19 +77,19 @@ where
     }
 
     /// Returns an owning iterator over the entries
-    pub fn iter(&self) -> impl Iterator<Item = (Prefix, T)> + '_ {
-        self.0
-            .iter()
-            .map(|item| (*item.key(), item.value().clone()))
+    pub fn iter(&self) -> impl Iterator<Item = RefMulti<'_, Prefix, T>> {
+        self.0.iter()
     }
 
     /// Returns an iterator over all entries whose prefixes are descendants (extensions) of
     /// `prefix`.
-    pub fn descendants<'a>(&'a self, prefix: &'a Prefix) -> impl Iterator<Item = (Prefix, T)> + 'a {
+    pub fn descendants<'a>(
+        &'a self,
+        prefix: &'a Prefix,
+    ) -> impl Iterator<Item = RefMulti<'a, Prefix, T>> + 'a {
         self.0
             .iter()
-            .filter(move |item| item.key().is_extension_of(prefix))
-            .map(move |item| (*item.key(), item.value().clone()))
+            .filter(move |p| p.key().is_extension_of(prefix))
     }
 
     /// Remove `prefix` and any of its ancestors if they are covered by their descendants.
@@ -98,7 +100,7 @@ where
         loop {
             let descendants: Vec<_> = self.descendants(&prefix).collect();
             let descendant_prefixes: Vec<&Prefix> =
-                descendants.iter().map(|(prefix, _)| prefix).collect();
+                descendants.iter().map(|item| item.key()).collect();
             if prefix.is_covered_by(descendant_prefixes) {
                 let _ = self.0.remove(&prefix);
             }
