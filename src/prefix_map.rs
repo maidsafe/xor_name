@@ -9,9 +9,16 @@
 //! Container that acts as a map whose keys are Prefixes.
 
 use crate::{Prefix, XorName};
-// use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
+use thiserror::Error;
 use tokio::sync::RwLock;
+
+#[derive(Error, Debug)]
+pub enum PrefixMapError {
+    #[error("Failed to serialize/deserialize PrefixMap: {0}")]
+    SerializationError(#[from] Box<bincode::ErrorKind>),
+}
 
 /// Container that acts as a map whose keys are prefixes.
 ///
@@ -22,9 +29,9 @@ use tokio::sync::RwLock;
 ///
 pub struct PrefixMap<T>(RwLock<BTreeMap<Prefix, T>>);
 
-impl<T> PrefixMap<T>
+impl<'de, T> PrefixMap<T>
 where
-    T: Clone,
+    T: Clone + Serialize + Deserialize<'de>,
 {
     /// Create empty `PrefixMap`.
     pub fn new() -> Self {
@@ -106,6 +113,19 @@ where
                 prefix = prefix.popped();
             }
         }
+    }
+
+    /// Get a bytes representation of the PrefixMap
+    pub async fn to_bytes(&self) -> Result<Vec<u8>, PrefixMapError> {
+        let rlock = self.0.read().await;
+        let bytes = bincode::serialize(&*rlock)?;
+        Ok(bytes)
+    }
+
+    /// Get back a PrefixMap from its bytes representation
+    pub async fn from_bytes(encoded: &'de [u8]) -> Result<Self, PrefixMapError> {
+        let decoded: BTreeMap<Prefix, T> = bincode::deserialize(encoded)?;
+        Ok(PrefixMap(RwLock::new(decoded)))
     }
 }
 
@@ -196,17 +216,20 @@ mod tests {
         let _ = map.insert(prefix("10"), 10).await;
 
         assert_eq!(
-            map.get_matching(&prefix("0").substituted_in(rng.gen())).await,
+            map.get_matching(&prefix("0").substituted_in(rng.gen()))
+                .await,
             Some((prefix("0"), 0))
         );
 
         assert_eq!(
-            map.get_matching(&prefix("11").substituted_in(rng.gen())).await,
+            map.get_matching(&prefix("11").substituted_in(rng.gen()))
+                .await,
             Some((prefix("1"), 1))
         );
 
         assert_eq!(
-            map.get_matching(&prefix("10").substituted_in(rng.gen())).await,
+            map.get_matching(&prefix("10").substituted_in(rng.gen()))
+                .await,
             Some((prefix("10"), 10))
         );
     }
@@ -240,21 +263,22 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn serialize_transparent() -> Result<()> {
-        // let mut map = PrefixMap::new();
-        // let _ = map.insert(prefix("0"), 0).await;
-        // let _ = map.insert(prefix("1"), 1).await;
-        // let _ = map.insert(prefix("10"), 10).await;
-        //
-        // let copy_map: BTreeMap<_, _> = map.clone().into();
-        // let serialized_copy_map = rmp_serde::to_vec(&copy_map)?;
-        //
-        // assert_eq!(rmp_serde::to_vec(&map)?, serialized_copy_map);
-        // let _ = rmp_serde::from_read::<_, PrefixMap<i32>>(&*serialized_copy_map)?;
+    async fn serialize_to_bytes() -> Result<()> {
+        let mut map = PrefixMap::<u64>::new();
+        let _ = map.insert(prefix("0"), 0).await;
+        let _ = map.insert(prefix("1"), 1).await;
+        let _ = map.insert(prefix("10"), 10).await;
+
+        let bytes = map.to_bytes().await?;
+        let map2 = PrefixMap::<u64>::from_bytes(&bytes).await?;
+        let bytes2 = map2.to_bytes().await?;
+
+        assert_eq!(bytes, bytes2);
         Ok(())
     }
 
     fn prefix(s: &str) -> Prefix {
-        s.parse().expect("Failed to parse prefix string, invalid test")
+        s.parse()
+            .expect("Failed to parse prefix string, invalid test")
     }
 }
