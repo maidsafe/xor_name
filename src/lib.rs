@@ -55,7 +55,6 @@
 
 use core::{cmp::Ordering, fmt, ops};
 pub use prefix::Prefix;
-pub use prefix_map::PrefixMap;
 use rand::{
     distributions::{Distribution, Standard},
     rngs::OsRng,
@@ -96,7 +95,6 @@ macro_rules! format {
 }
 
 mod prefix;
-mod prefix_map;
 
 /// Constant byte length of `XorName`.
 pub const XOR_NAME_LEN: usize = 32;
@@ -155,7 +153,7 @@ impl XorName {
     /// Returns a copy of `self`, with the `i`-th bit set to `bit`.
     ///
     /// If `i` exceeds the number of bits in `self`, an unmodified copy of `self` is returned.
-    fn with_bit(mut self, i: u8, bit: bool) -> Self {
+    pub fn with_bit(mut self, i: u8, bit: bool) -> Self {
         if i as usize >= XOR_NAME_LEN * 8 {
             return self;
         }

@@ -12,10 +12,6 @@ repository = "https://github.com/maidsafe/xor_name"
 [dependencies]
 rand_core = "0.5.1"
 
-  [dependencies.dashmap]
-  version = "4.0.2"
-  features = [ "serde" ]
-
   [dependencies.tiny-keccak]
   version = "~2.0"
   features = [ "sha3" ]
