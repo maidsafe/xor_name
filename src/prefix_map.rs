@@ -72,7 +72,7 @@ where
     }
 
     /// Get the entry at the prefix that matches `name`. In case of multiple matches, returns the
-    /// one with the longest prefix.
+    /// one with the longest prefix. This API absolutely matches the given `name` else returns None.
     pub async fn get_matching(&self, name: &XorName) -> Option<(Prefix, T)> {
         let rlock = self.0.read().await;
         rlock
@@ -80,6 +80,26 @@ where
             .filter(|(prefix, _)| prefix.matches(name))
             .max_by_key(|(prefix, _)| prefix.bit_count())
             .map(|(p, t)| (*p, t.clone()))
+    }
+
+    /// Get the entry at the prefix that matches `name`. In case of multiple matches, returns the
+    /// one with the longest prefix. If there are no prefixes matching the given `name`, return
+    /// a prefix matching the opposite to 1st bit of `name`. If the map is empty, return None.
+    pub async fn try_get_matching(&self, name: &XorName) -> Option<(Prefix, T)> {
+        let rlock = self.0.read().await;
+        if let Some((prefix, t)) = rlock
+            .iter()
+            .filter(|(prefix, _)| prefix.matches(name))
+            .max_by_key(|(prefix, _)| prefix.bit_count())
+        {
+            Some((*prefix, t.clone()))
+        } else {
+            rlock
+                .iter()
+                .filter(|(prefix, _)| prefix.matches(&name.with_bit(0, !name.bit(0))))
+                .max_by_key(|(prefix, _)| prefix.bit_count())
+                .map(|(p, t)| (*p, t.clone()))
+        }
     }
 
     /// Get the entry at the prefix that matches `prefix`. In case of multiple matches, returns the
@@ -166,6 +186,35 @@ mod tests {
         assert_eq!(map.get(&prefix("00")).await, Some((prefix("00"), 1)));
         assert_eq!(map.get(&prefix("01")).await, Some((prefix("01"), 2)));
         assert_eq!(map.get(&prefix("0")).await, None);
+    }
+
+    #[tokio::test]
+    async fn return_opposite_prefix_if_none_matching() {
+        let mut rng = rand::thread_rng();
+
+        let mut map = PrefixMap::new();
+        let _ = map.insert(prefix("0"), 1).await;
+
+        // There are no matching prefixes, so return None.
+        assert_eq!(
+            map.get_matching(&prefix("1").substituted_in(rng.gen()))
+                .await,
+            None
+        );
+
+        // There are no matching prefixes, so return an opposite prefix.
+        assert_eq!(
+            map.try_get_matching(&prefix("1").substituted_in(rng.gen()))
+                .await,
+            Some((prefix("0"), 1))
+        );
+
+        let _ = map.insert(prefix("1"), 1).await;
+        assert_eq!(
+            map.try_get_matching(&prefix("1").substituted_in(rng.gen()))
+                .await,
+            Some((prefix("1"), 1))
+        );
     }
 
     #[tokio::test]
