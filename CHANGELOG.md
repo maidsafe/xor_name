@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.0.0](https://github.com/maidsafe/xor_name/compare/v2.0.0...v3.0.0) (2021-08-24)
+
+
+### ⚠ BREAKING CHANGES
+
+* remove prefix_map
+
+### Features
+
+* remove prefix_map make with_bit public ([efa63e2](https://github.com/maidsafe/xor_name/commit/efa63e26dc3820c6ba1cdeaf270f41030684fa09))
+* use DashMaps for better concurrency ([2ef45f3](https://github.com/maidsafe/xor_name/commit/2ef45f328699ccb8a750b8f0e5788b792414f3c1))
+
 ## [2.0.0](https://github.com/maidsafe/xor_name/compare/v1.3.0...v2.0.0) (2021-08-10)
 
 
