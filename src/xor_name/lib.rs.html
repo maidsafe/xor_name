@@ -678,8 +678,6 @@
 <span id="678">678</span>
 <span id="679">679</span>
 <span id="680">680</span>
-<span id="681">681</span>
-<span id="682">682</span>
 </pre><pre class="rust">
 <span class="comment">// Copyright 2020 MaidSafe.net limited.</span>
 <span class="comment">//</span>
@@ -738,7 +736,6 @@
 
 <span class="kw">use</span> <span class="ident">core</span>::{<span class="ident">cmp::Ordering</span>, <span class="ident">fmt</span>, <span class="ident">ops</span>};
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">prefix::Prefix</span>;
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">prefix_map::PrefixMap</span>;
 <span class="kw">use</span> <span class="ident">rand</span>::{
     <span class="ident">distributions</span>::{<span class="ident">Distribution</span>, <span class="ident">Standard</span>},
     <span class="ident">rngs::OsRng</span>,
@@ -779,7 +776,6 @@
 }
 
 <span class="kw">mod</span> <span class="ident">prefix</span>;
-<span class="kw">mod</span> <span class="ident">prefix_map</span>;
 
 <span class="doccomment">/// Constant byte length of `XorName`.</span>
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">XOR_NAME_LEN</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">32</span>;
@@ -838,7 +834,7 @@
     <span class="doccomment">/// Returns a copy of `self`, with the `i`-th bit set to `bit`.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// If `i` exceeds the number of bits in `self`, an unmodified copy of `self` is returned.</span>
-    <span class="kw">fn</span> <span class="ident">with_bit</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">i</span>: <span class="ident">u8</span>, <span class="ident">bit</span>: <span class="ident">bool</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_bit</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">i</span>: <span class="ident">u8</span>, <span class="ident">bit</span>: <span class="ident">bool</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="kw">if</span> <span class="ident">i</span> <span class="kw">as</span> <span class="ident">usize</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">XOR_NAME_LEN</span> <span class="op">*</span> <span class="number">8</span> {
             <span class="kw">return</span> <span class="self">self</span>;
         }
