@@ -1,4 +1,4 @@
-// Copyright 2020 MaidSafe.net limited.
+// Copyright 2021 MaidSafe.net limited.
 //
 // This SAFE Network Software is licensed to you under the MIT license <LICENSE-MIT
 // http://opensource.org/licenses/MIT> or the Modified BSD license <LICENSE-BSD
@@ -111,13 +111,18 @@ pub const XOR_NAME_LEN: usize = 32;
 pub struct XorName(pub [u8; XOR_NAME_LEN]);
 
 impl XorName {
+    /// Generate a XorName for the given content.
+    pub fn from_content(content: &[u8]) -> Self {
+        Self::from_content_parts(&[content])
+    }
+
     /// Generate a XorName for the given content (for content-addressable-storage)
-    pub fn from_content(content_parts: &[&[u8]]) -> Self {
+    pub fn from_content_parts(content_parts: &[&[u8]]) -> Self {
         let mut sha3 = Sha3::v256();
         for part in content_parts {
             sha3.update(part);
         }
-        let mut hash = [0u8; 32];
+        let mut hash = [0u8; XOR_NAME_LEN];
         sha3.finalize(&mut hash);
         Self(hash)
     }
@@ -655,9 +660,9 @@ mod tests {
 
     #[test]
     fn xor_name_from_content() {
-        let alpha_1 = XorName::from_content(&[b"abcdefg", b"hijk"]);
-        let alpha_2 = XorName::from_content(&[b"abcdefg", b"hijk"]);
-        let alpha_3 = XorName::from_content(&[b"abcdefg"]);
+        let alpha_1 = XorName::from_content_parts(&[b"abcdefg", b"hijk"]);
+        let alpha_2 = XorName::from_content_parts(&[b"abcdefg", b"hijk"]);
+        let alpha_3 = XorName::from_content(b"abcdefg");
 
         assert_eq!(alpha_1, alpha_2);
         assert_ne!(alpha_1, alpha_3);
@@ -665,8 +670,8 @@ mod tests {
 
     #[test]
     fn xor_name_from_content_is_agnostic_to_where_content_parts_splits() {
-        let alpha_1 = XorName::from_content(&[b"abcdefg", b"hijk"]);
-        let alpha_2 = XorName::from_content(&[b"abcdefghijk"]);
+        let alpha_1 = XorName::from_content_parts(&[b"abcdefg", b"hijk"]);
+        let alpha_2 = XorName::from_content(b"abcdefghijk");
         assert_eq!(alpha_1, alpha_2);
     }
 
