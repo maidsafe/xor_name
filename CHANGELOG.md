@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.1.0](https://github.com/maidsafe/xor_name/compare/v3.0.0...v3.1.0) (2021-08-26)
+
+
+### Features
+
+* **api:** simplify from content api ([441acc7](https://github.com/maidsafe/xor_name/commit/441acc7269747cff6868adf425cd0be6c12b39e5))
+
 ## [3.0.0](https://github.com/maidsafe/xor_name/compare/v2.0.0...v3.0.0) (2021-08-24)
 
 
