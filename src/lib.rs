@@ -351,7 +351,7 @@ mod tests {
     }
 
     #[test]
-    #[allow(clippy::eq_op)]
+    #[allow(clippy::eq_op, clippy::nonminimal_bool)]
     fn xor_name_ord() {
         let type1: XorName = XorName([1u8; XOR_NAME_LEN]);
         let type2: XorName = XorName([2u8; XOR_NAME_LEN]);
@@ -371,6 +371,7 @@ mod tests {
     }
 
     #[test]
+    #[allow(clippy::nonminimal_bool)]
     fn xor_name_equal_assertion() {
         let mut rng = SmallRng::from_entropy();
         let type1: XorName = rng.gen();

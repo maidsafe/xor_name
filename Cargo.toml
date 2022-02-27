@@ -27,9 +27,7 @@ rand_core = "0.6.3"
   features = [ "derive" ]
 
 [dev-dependencies]
-rmp-serde = "0.15.5"
 bincode = "1.2.1"
-eyre = "0.6.5"
 
   [dev-dependencies.arrayvec]
   version = "~0.5.1"
