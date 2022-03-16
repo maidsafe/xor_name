@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.0.0](https://github.com/maidsafe/xor_name/compare/v3.1.0...v4.0.0) (2022-03-16)
+
+
+### ⚠ BREAKING CHANGES
+
+* public api changed
+
+* remove OsRng ([c4d64e9](https://github.com/maidsafe/xor_name/commit/c4d64e98556e5c9caff902182c9e840dad869580))
+
 ## [3.1.0](https://github.com/maidsafe/xor_name/compare/v3.0.0...v3.1.0) (2021-08-26)
 
 
