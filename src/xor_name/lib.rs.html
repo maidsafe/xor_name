@@ -1,4 +1,6 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings"></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="shortcut icon" href="http://maidsafe.net/img/favicon.ico"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../xor_name/index.html'><div class='logo-container'><img src='https://raw.githubusercontent.com/maidsafe/QA/master/Images/maidsafe_logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img src="../../brush.svg" width="18" height="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img src="../../wheel.svg" width="18" height="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src&#x2F;lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><script defer src="../../main.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script>
+    <noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="shortcut icon" href="http:&#x2F;&#x2F;maidsafe.net&#x2F;img&#x2F;favicon.ico"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a class="sidebar-logo" href="../../xor_name/index.html"><div class="logo-container"><img src="https:&#x2F;&#x2F;raw.githubusercontent.com&#x2F;maidsafe&#x2F;QA&#x2F;master&#x2F;Images&#x2F;maidsafe_logo.png" alt="logo"></div>
+        </a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../xor_name/index.html"><img src="https:&#x2F;&#x2F;raw.githubusercontent.com&#x2F;maidsafe&#x2F;QA&#x2F;master&#x2F;Images&#x2F;maidsafe_logo.png" alt="logo"></a><nav class="sub"><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -682,9 +684,7 @@
 <span id="682">682</span>
 <span id="683">683</span>
 <span id="684">684</span>
-<span id="685">685</span>
-</pre><pre class="rust">
-<span class="comment">// Copyright 2021 MaidSafe.net limited.</span>
+</pre><pre class="rust"><code><span class="comment">// Copyright 2021 MaidSafe.net limited.</span>
 <span class="comment">//</span>
 <span class="comment">// This SAFE Network Software is licensed to you under the MIT license &lt;LICENSE-MIT</span>
 <span class="comment">// http://opensource.org/licenses/MIT&gt; or the Modified BSD license &lt;LICENSE-BSD</span>
@@ -743,18 +743,16 @@
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">prefix::Prefix</span>;
 <span class="kw">use</span> <span class="ident">rand</span>::{
     <span class="ident">distributions</span>::{<span class="ident">Distribution</span>, <span class="ident">Standard</span>},
-    <span class="ident">rngs::OsRng</span>,
     <span class="ident">Rng</span>,
 };
-<span class="kw">use</span> <span class="ident">rand_core::RngCore</span>;
 <span class="kw">use</span> <span class="ident">serde</span>::{<span class="ident">Deserialize</span>, <span class="ident">Serialize</span>};
 <span class="kw">use</span> <span class="ident">tiny_keccak</span>::{<span class="ident">Hasher</span>, <span class="ident">Sha3</span>};
 
 <span class="doccomment">/// Creates XorName with the given leading bytes and the rest filled with zeroes.</span>
 <span class="attribute">#[<span class="ident">macro_export</span>]</span>
 <span class="macro">macro_rules!</span> <span class="ident">xor_name</span> {
-    ($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">byte</span>:<span class="ident">expr</span>),<span class="op">*</span> $(,)<span class="question-mark">?</span>) <span class="op">=</span><span class="op">&gt;</span> {{
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">name</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="kw">crate</span><span class="macro-nonterminal">::XorName::default</span>();
+    ($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">byte</span>:<span class="ident">expr</span>),<span class="op">*</span> $(,)<span class="question-mark">?</span>) =&gt; {{
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">name</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::XorName::default</span>();
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">index</span> <span class="op">=</span> <span class="number">0</span>;
 
         <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">unused_assignments</span>)]</span>
@@ -773,9 +771,9 @@
 <span class="comment">// capacity of the returned `ArrayString` needs to explicitly given as the first argument.</span>
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="macro">macro_rules!</span> <span class="ident">format</span> {
-    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">capacity</span>:<span class="ident">expr</span>, $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">arg</span>:<span class="ident">tt</span>)<span class="kw-2">*</span>) <span class="op">=</span><span class="op">&gt;</span> {{
+    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">capacity</span>:<span class="ident">expr</span>, $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">arg</span>:<span class="ident">tt</span>)<span class="kw-2">*</span>) =&gt; {{
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">output</span> <span class="op">=</span> <span class="ident">arrayvec::ArrayString</span>::<span class="op">&lt;</span>[<span class="kw">_</span>; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">capacity</span>]<span class="op">&gt;</span><span class="ident">::new</span>();
-        <span class="ident">core::fmt::write</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">output</span>, <span class="macro">core::format_args!</span>($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">arg</span>)<span class="kw-2">*</span>)).<span class="ident">expect</span>(<span class="string">&quot;insufficient ArrayString capacity&quot;</span>);
+        <span class="ident">core::fmt::write</span>(<span class="kw-2">&amp;mut</span> <span class="ident">output</span>, <span class="macro">core::format_args!</span>($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">arg</span>)<span class="kw-2">*</span>)).<span class="ident">expect</span>(<span class="string">&quot;insufficient ArrayString capacity&quot;</span>);
         <span class="ident">output</span>
     }}
 }
@@ -798,32 +796,30 @@
 
 <span class="kw">impl</span> <span class="ident">XorName</span> {
     <span class="doccomment">/// Generate a XorName for the given content.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_content</span>(<span class="ident">content</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="self">Self</span><span class="ident">::from_content_parts</span>(<span class="kw-2">&amp;</span>[<span class="ident">content</span>])
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_content</span>(<span class="ident">content</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="self">Self</span> {
+        <span class="ident"><span class="self">Self</span>::from_content_parts</span>(<span class="kw-2">&amp;</span>[<span class="ident">content</span>])
     }
 
     <span class="doccomment">/// Generate a XorName for the given content (for content-addressable-storage)</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_content_parts</span>(<span class="ident">content_parts</span>: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span>[<span class="ident">u8</span>]]) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_content_parts</span>(<span class="ident">content_parts</span>: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span>[<span class="ident">u8</span>]]) -&gt; <span class="self">Self</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">sha3</span> <span class="op">=</span> <span class="ident">Sha3::v256</span>();
         <span class="kw">for</span> <span class="ident">part</span> <span class="kw">in</span> <span class="ident">content_parts</span> {
             <span class="ident">sha3</span>.<span class="ident">update</span>(<span class="ident">part</span>);
         }
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">hash</span> <span class="op">=</span> [<span class="number">0u8</span>; <span class="ident">XOR_NAME_LEN</span>];
-        <span class="ident">sha3</span>.<span class="ident">finalize</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">hash</span>);
+        <span class="ident">sha3</span>.<span class="ident">finalize</span>(<span class="kw-2">&amp;mut</span> <span class="ident">hash</span>);
         <span class="self">Self</span>(<span class="ident">hash</span>)
     }
 
     <span class="doccomment">/// Generate a random XorName</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">random</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">random</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Rng</span><span class="op">&gt;</span>(<span class="ident">rng</span>: <span class="kw-2">&amp;mut</span> <span class="ident">T</span>) -&gt; <span class="self">Self</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">xor</span> <span class="op">=</span> [<span class="number">0u8</span>; <span class="ident">XOR_NAME_LEN</span>];
-        <span class="comment">// TODO: OsRng needs to be removed + replaced to follow no-std.</span>
-        <span class="ident">OsRng</span>.<span class="ident">fill_bytes</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">xor</span>);
-
+        <span class="ident">rng</span>.<span class="ident">fill</span>(<span class="kw-2">&amp;mut</span> <span class="ident">xor</span>);
         <span class="self">Self</span>(<span class="ident">xor</span>)
     }
 
     <span class="doccomment">/// Returns `true` if the `i`-th bit is `1`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">bit</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">i</span>: <span class="ident">u8</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">bit</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">i</span>: <span class="ident">u8</span>) -&gt; <span class="ident">bool</span> {
         <span class="kw">let</span> <span class="ident">index</span> <span class="op">=</span> <span class="ident">i</span> <span class="op">/</span> <span class="number">8</span>;
         <span class="kw">let</span> <span class="ident">pow_i</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="number">7</span> <span class="op">-</span> (<span class="ident">i</span> <span class="op">%</span> <span class="number">8</span>));
         <span class="self">self</span>[<span class="ident">index</span> <span class="kw">as</span> <span class="ident">usize</span>] <span class="op">&amp;</span> <span class="ident">pow_i</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span>
@@ -832,7 +828,7 @@
     <span class="doccomment">/// Compares the distance of the arguments to `self`. Returns `Less` if `lhs` is closer,</span>
     <span class="doccomment">/// `Greater` if `rhs` is closer, and `Equal` if `lhs == rhs`. (The XOR distance can only be</span>
     <span class="doccomment">/// equal if the arguments are equal.)</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">cmp_distance</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">lhs</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>, <span class="ident">rhs</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Ordering</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">cmp_distance</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">lhs</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>, <span class="ident">rhs</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="ident">Ordering</span> {
         <span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="number">0</span>..<span class="ident">XOR_NAME_LEN</span> {
             <span class="kw">if</span> <span class="ident">lhs</span>[<span class="ident">i</span>] <span class="op">!</span><span class="op">=</span> <span class="ident">rhs</span>[<span class="ident">i</span>] {
                 <span class="kw">return</span> <span class="ident">Ord::cmp</span>(<span class="kw-2">&amp;</span>(<span class="ident">lhs</span>[<span class="ident">i</span>] <span class="op">^</span> <span class="self">self</span>[<span class="ident">i</span>]), <span class="kw-2">&amp;</span>(<span class="ident">rhs</span>[<span class="ident">i</span>] <span class="op">^</span> <span class="self">self</span>[<span class="ident">i</span>]));
@@ -844,7 +840,7 @@
     <span class="doccomment">/// Returns a copy of `self`, with the `i`-th bit set to `bit`.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// If `i` exceeds the number of bits in `self`, an unmodified copy of `self` is returned.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_bit</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">i</span>: <span class="ident">u8</span>, <span class="ident">bit</span>: <span class="ident">bool</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_bit</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">i</span>: <span class="ident">u8</span>, <span class="ident">bit</span>: <span class="ident">bool</span>) -&gt; <span class="self">Self</span> {
         <span class="kw">if</span> <span class="ident">i</span> <span class="kw">as</span> <span class="ident">usize</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">XOR_NAME_LEN</span> <span class="op">*</span> <span class="number">8</span> {
             <span class="kw">return</span> <span class="self">self</span>;
         }
@@ -860,7 +856,7 @@
     <span class="doccomment">/// Returns a copy of `self`, with the `i`-th bit flipped.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// If `i` exceeds the number of bits in `self`, an unmodified copy of `self` is returned.</span>
-    <span class="kw">fn</span> <span class="ident">with_flipped_bit</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">i</span>: <span class="ident">u8</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">with_flipped_bit</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">i</span>: <span class="ident">u8</span>) -&gt; <span class="self">Self</span> {
         <span class="kw">if</span> <span class="ident">i</span> <span class="kw">as</span> <span class="ident">usize</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">XOR_NAME_LEN</span> <span class="op">*</span> <span class="number">8</span> {
             <span class="kw">return</span> <span class="self">self</span>;
         }
@@ -870,7 +866,7 @@
 
     <span class="doccomment">/// Returns a copy of self with first `n` bits preserved, and remaining bits</span>
     <span class="doccomment">/// set to 0 (val == false) or 1 (val == true).</span>
-    <span class="kw">fn</span> <span class="ident">set_remaining</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">n</span>: <span class="ident">u8</span>, <span class="ident">val</span>: <span class="ident">bool</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">set_remaining</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">n</span>: <span class="ident">u8</span>, <span class="ident">val</span>: <span class="ident">bool</span>) -&gt; <span class="self">Self</span> {
         <span class="kw">for</span> (<span class="ident">i</span>, <span class="ident">x</span>) <span class="kw">in</span> <span class="self">self</span>.<span class="number">0</span>.<span class="ident">iter_mut</span>().<span class="ident">enumerate</span>() {
             <span class="kw">let</span> <span class="ident">i</span> <span class="op">=</span> <span class="ident">i</span> <span class="kw">as</span> <span class="ident">u8</span>;
 
@@ -891,7 +887,7 @@
 
     <span class="doccomment">/// Returns the length of the common prefix with the `other` name; e. g.</span>
     <span class="doccomment">/// the when `other = 11110000` and `self = 11111111` this is 4.</span>
-    <span class="kw">fn</span> <span class="ident">common_prefix</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+    <span class="kw">fn</span> <span class="ident">common_prefix</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="ident">usize</span> {
         <span class="kw">for</span> <span class="ident">byte_index</span> <span class="kw">in</span> <span class="number">0</span>..<span class="ident">XOR_NAME_LEN</span> {
             <span class="kw">if</span> <span class="self">self</span>[<span class="ident">byte_index</span>] <span class="op">!</span><span class="op">=</span> <span class="ident">other</span>[<span class="ident">byte_index</span>] {
                 <span class="kw">return</span> (<span class="ident">byte_index</span> <span class="op">*</span> <span class="number">8</span>)
@@ -903,7 +899,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">fmt::Debug</span> <span class="kw">for</span> <span class="ident">XorName</span> {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">formatter</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
+    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">formatter</span>: <span class="kw-2">&amp;mut</span> <span class="ident">fmt::Formatter</span>) -&gt; <span class="ident">fmt::Result</span> {
         <span class="macro">write!</span>(
             <span class="ident">formatter</span>,
             <span class="string">&quot;{:02x}{:02x}{:02x}({:08b})..&quot;</span>,
@@ -913,13 +909,13 @@
 }
 
 <span class="kw">impl</span> <span class="ident">fmt::Display</span> <span class="kw">for</span> <span class="ident">XorName</span> {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">formatter</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
+    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">formatter</span>: <span class="kw-2">&amp;mut</span> <span class="ident">fmt::Formatter</span>) -&gt; <span class="ident">fmt::Result</span> {
         <span class="macro">write!</span>(<span class="ident">formatter</span>, <span class="string">&quot;{:02x}{:02x}{:02x}..&quot;</span>, <span class="self">self</span>[<span class="number">0</span>], <span class="self">self</span>[<span class="number">1</span>], <span class="self">self</span>[<span class="number">2</span>])
     }
 }
 
 <span class="kw">impl</span> <span class="ident">fmt::Binary</span> <span class="kw">for</span> <span class="ident">XorName</span> {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">formatter</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
+    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">formatter</span>: <span class="kw-2">&amp;mut</span> <span class="ident">fmt::Formatter</span>) -&gt; <span class="ident">fmt::Result</span> {
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">width</span>) <span class="op">=</span> <span class="ident">formatter</span>.<span class="ident">width</span>() {
             <span class="kw">let</span> <span class="ident">whole_bytes</span> <span class="op">=</span> <span class="ident">width</span> <span class="op">/</span> <span class="number">8</span>;
             <span class="kw">let</span> <span class="ident">remaining_bits</span> <span class="op">=</span> <span class="ident">width</span> <span class="op">%</span> <span class="number">8</span>;
@@ -945,7 +941,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">fmt::LowerHex</span> <span class="kw">for</span> <span class="ident">XorName</span> {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">formatter</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
+    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">formatter</span>: <span class="kw-2">&amp;mut</span> <span class="ident">fmt::Formatter</span>) -&gt; <span class="ident">fmt::Result</span> {
         <span class="kw">let</span> <span class="ident">bytes</span> <span class="op">=</span> <span class="ident">formatter</span>.<span class="ident">width</span>().<span class="ident">unwrap_or</span>(<span class="number">2</span> <span class="op">*</span> <span class="ident">XOR_NAME_LEN</span>) <span class="op">/</span> <span class="number">2</span>;
 
         <span class="kw">for</span> <span class="ident">byte</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="self">self</span>[..<span class="ident">bytes</span>] {
@@ -961,7 +957,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">fmt::UpperHex</span> <span class="kw">for</span> <span class="ident">XorName</span> {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">formatter</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
+    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">formatter</span>: <span class="kw-2">&amp;mut</span> <span class="ident">fmt::Formatter</span>) -&gt; <span class="ident">fmt::Result</span> {
         <span class="kw">let</span> <span class="ident">bytes</span> <span class="op">=</span> <span class="ident">formatter</span>.<span class="ident">width</span>().<span class="ident">unwrap_or</span>(<span class="number">2</span> <span class="op">*</span> <span class="ident">XOR_NAME_LEN</span>) <span class="op">/</span> <span class="number">2</span>;
 
         <span class="kw">for</span> <span class="ident">byte</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="self">self</span>[..<span class="ident">bytes</span>] {
@@ -977,9 +973,9 @@
 }
 
 <span class="kw">impl</span> <span class="ident">Distribution</span><span class="op">&lt;</span><span class="ident">XorName</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Standard</span> {
-    <span class="kw">fn</span> <span class="ident">sample</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">Rng</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">rng</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">R</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">XorName</span> {
+    <span class="kw">fn</span> <span class="ident">sample</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">Rng</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">rng</span>: <span class="kw-2">&amp;mut</span> <span class="ident">R</span>) -&gt; <span class="ident">XorName</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">name</span> <span class="op">=</span> <span class="ident">XorName::default</span>();
-        <span class="ident">rng</span>.<span class="ident">fill</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">name</span>.<span class="number">0</span>[..]);
+        <span class="ident">rng</span>.<span class="ident">fill</span>(<span class="kw-2">&amp;mut</span> <span class="ident">name</span>.<span class="number">0</span>[..]);
         <span class="ident">name</span>
     }
 }
@@ -987,8 +983,8 @@
 <span class="kw">impl</span> <span class="ident">ops::Not</span> <span class="kw">for</span> <span class="ident">XorName</span> {
     <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="self">Self</span>;
 
-    <span class="kw">fn</span> <span class="ident">not</span>(<span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="kw">for</span> <span class="ident">byte</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="number">0</span> {
+    <span class="kw">fn</span> <span class="ident">not</span>(<span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="self">Self</span> {
+        <span class="kw">for</span> <span class="ident">byte</span> <span class="kw">in</span> <span class="kw-2">&amp;mut</span> <span class="self">self</span>.<span class="number">0</span> {
             <span class="kw-2">*</span><span class="ident">byte</span> <span class="op">=</span> <span class="op">!</span><span class="kw-2">*</span><span class="ident">byte</span>;
         }
         <span class="self">self</span>
@@ -996,13 +992,13 @@
 }
 
 <span class="kw">impl</span> <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">XorName</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">XorName</span> {
-    <span class="kw">fn</span> <span class="ident">as_ref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">as_ref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="self">Self</span> {
         <span class="self">self</span>
     }
 }
 
 <span class="kw">impl</span> <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">XorName</span> {
-    <span class="kw">fn</span> <span class="ident">as_ref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] {
+    <span class="kw">fn</span> <span class="ident">as_ref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] {
         <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span>[..]
     }
 }
@@ -1010,7 +1006,7 @@
 <span class="kw">impl</span> <span class="ident">ops::Deref</span> <span class="kw">for</span> <span class="ident">XorName</span> {
     <span class="kw">type</span> <span class="ident">Target</span> <span class="op">=</span> [<span class="ident">u8</span>];
 
-    <span class="kw">fn</span> <span class="ident">deref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="self">Self</span><span class="ident">::Target</span> {
+    <span class="kw">fn</span> <span class="ident">deref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident"><span class="self">Self</span>::Target</span> {
         <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span>[..]
     }
 }
@@ -1023,15 +1019,17 @@
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">create_random_xorname</span>() {
-        <span class="kw">let</span> <span class="ident">xorname</span>: <span class="ident">XorName</span> <span class="op">=</span> <span class="ident">XorName::random</span>();
-        <span class="kw">let</span> <span class="ident">xorname2</span>: <span class="ident">XorName</span> <span class="op">=</span> <span class="ident">XorName::random</span>();
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">rng</span> <span class="op">=</span> <span class="ident">SmallRng::from_entropy</span>();
+        <span class="kw">let</span> <span class="ident">xorname</span>: <span class="ident">XorName</span> <span class="op">=</span> <span class="ident">XorName::random</span>(<span class="kw-2">&amp;mut</span> <span class="ident">rng</span>);
+        <span class="kw">let</span> <span class="ident">xorname2</span>: <span class="ident">XorName</span> <span class="op">=</span> <span class="ident">XorName::random</span>(<span class="kw-2">&amp;mut</span> <span class="ident">rng</span>);
 
         <span class="macro">assert_ne!</span>(<span class="ident">xorname</span>, <span class="ident">xorname2</span>);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">serialisation_xor_name</span>() {
-        <span class="kw">let</span> <span class="ident">obj_before</span>: <span class="ident">XorName</span> <span class="op">=</span> <span class="ident">XorName::random</span>();
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">rng</span> <span class="op">=</span> <span class="ident">SmallRng::from_entropy</span>();
+        <span class="kw">let</span> <span class="ident">obj_before</span>: <span class="ident">XorName</span> <span class="op">=</span> <span class="ident">XorName::random</span>(<span class="kw-2">&amp;mut</span> <span class="ident">rng</span>);
         <span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> <span class="ident">serialize</span>(<span class="kw-2">&amp;</span><span class="ident">obj_before</span>).<span class="ident">unwrap</span>();
         <span class="macro">assert_eq!</span>(<span class="ident">data</span>.<span class="ident">len</span>(), <span class="ident">XOR_NAME_LEN</span>);
         <span class="kw">let</span> <span class="ident">obj_after</span>: <span class="ident">XorName</span> <span class="op">=</span> <span class="ident">deserialize</span>(<span class="kw-2">&amp;</span><span class="ident">data</span>).<span class="ident">unwrap</span>();
@@ -1039,7 +1037,7 @@
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::eq_op</span>)]</span>
+    <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::eq_op</span>, <span class="ident">clippy::nonminimal_bool</span>)]</span>
     <span class="kw">fn</span> <span class="ident">xor_name_ord</span>() {
         <span class="kw">let</span> <span class="ident">type1</span>: <span class="ident">XorName</span> <span class="op">=</span> <span class="ident">XorName</span>([<span class="number">1u8</span>; <span class="ident">XOR_NAME_LEN</span>]);
         <span class="kw">let</span> <span class="ident">type2</span>: <span class="ident">XorName</span> <span class="op">=</span> <span class="ident">XorName</span>([<span class="number">2u8</span>; <span class="ident">XOR_NAME_LEN</span>]);
@@ -1059,6 +1057,7 @@
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
+    <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::nonminimal_bool</span>)]</span>
     <span class="kw">fn</span> <span class="ident">xor_name_equal_assertion</span>() {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">rng</span> <span class="op">=</span> <span class="ident">SmallRng::from_entropy</span>();
         <span class="kw">let</span> <span class="ident">type1</span>: <span class="ident">XorName</span> <span class="op">=</span> <span class="ident">rng</span>.<span class="ident">gen</span>();
@@ -1363,11 +1362,12 @@
 
     <span class="comment">// Create a `XorName` with the 8 trailing bytes equal to `x` (in big endian order) and the rest</span>
     <span class="comment">// filled with zeroes.</span>
-    <span class="kw">fn</span> <span class="ident">from_u64</span>(<span class="ident">x</span>: <span class="ident">u64</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">XorName</span> {
+    <span class="kw">fn</span> <span class="ident">from_u64</span>(<span class="ident">x</span>: <span class="ident">u64</span>) -&gt; <span class="ident">XorName</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">name</span> <span class="op">=</span> <span class="ident">XorName::default</span>();
         <span class="ident">name</span>.<span class="number">0</span>[<span class="ident">XOR_NAME_LEN</span> <span class="op">-</span> <span class="number">8</span>..].<span class="ident">copy_from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">x</span>.<span class="ident">to_be_bytes</span>());
         <span class="ident">name</span>
     }
 }
-</pre></div>
-</section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="xor_name" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div><script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script></body></html>
+</code></pre></div>
+</section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="xor_name" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.59.0 (9d1b2106e 2022-02-23)" ></div>
+</body></html>
