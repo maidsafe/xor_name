@@ -57,10 +57,8 @@ use core::{cmp::Ordering, fmt, ops};
 pub use prefix::Prefix;
 use rand::{
     distributions::{Distribution, Standard},
-    rngs::OsRng,
     Rng,
 };
-use rand_core::RngCore;
 use serde::{Deserialize, Serialize};
 use tiny_keccak::{Hasher, Sha3};
 
@@ -128,11 +126,9 @@ impl XorName {
     }
 
     /// Generate a random XorName
-    pub fn random() -> Self {
+    pub fn random<T: Rng>(rng: &mut T) -> Self {
         let mut xor = [0u8; XOR_NAME_LEN];
-        // TODO: OsRng needs to be removed + replaced to follow no-std.
-        OsRng.fill_bytes(&mut xor);
-
+        rng.fill(&mut xor);
         Self(xor)
     }
 
@@ -337,15 +333,17 @@ mod tests {
 
     #[test]
     fn create_random_xorname() {
-        let xorname: XorName = XorName::random();
-        let xorname2: XorName = XorName::random();
+        let mut rng = SmallRng::from_entropy();
+        let xorname: XorName = XorName::random(&mut rng);
+        let xorname2: XorName = XorName::random(&mut rng);
 
         assert_ne!(xorname, xorname2);
     }
 
     #[test]
     fn serialisation_xor_name() {
-        let obj_before: XorName = XorName::random();
+        let mut rng = SmallRng::from_entropy();
+        let obj_before: XorName = XorName::random(&mut rng);
         let data = serialize(&obj_before).unwrap();
         assert_eq!(data.len(), XOR_NAME_LEN);
         let obj_after: XorName = deserialize(&data).unwrap();
@@ -353,7 +351,7 @@ mod tests {
     }
 
     #[test]
-    #[allow(clippy::eq_op)]
+    #[allow(clippy::eq_op, clippy::nonminimal_bool)]
     fn xor_name_ord() {
         let type1: XorName = XorName([1u8; XOR_NAME_LEN]);
         let type2: XorName = XorName([2u8; XOR_NAME_LEN]);
@@ -373,6 +371,7 @@ mod tests {
     }
 
     #[test]
+    #[allow(clippy::nonminimal_bool)]
     fn xor_name_equal_assertion() {
         let mut rng = SmallRng::from_entropy();
         let type1: XorName = rng.gen();

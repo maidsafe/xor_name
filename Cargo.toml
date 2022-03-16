@@ -10,14 +10,14 @@ readme = "README.md"
 repository = "https://github.com/maidsafe/xor_name"
 
 [dependencies]
-rand_core = "0.5.1"
+rand_core = "0.6.3"
 
   [dependencies.tiny-keccak]
   version = "~2.0"
   features = [ "sha3" ]
 
   [dependencies.rand]
-  version = "~0.7.3"
+  version = "~0.8.5"
   default-features = false
   features = [ "std" ]
 
@@ -27,15 +27,13 @@ rand_core = "0.5.1"
   features = [ "derive" ]
 
 [dev-dependencies]
-rmp-serde = "0.15.5"
 bincode = "1.2.1"
-eyre = "0.6.5"
 
   [dev-dependencies.arrayvec]
   version = "~0.5.1"
   default-features = false
 
   [dev-dependencies.rand]
-  version = "~0.7.3"
+  version = "~0.8.5"
   default-features = false
   features = [ "getrandom", "small_rng" ]
