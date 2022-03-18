@@ -55,10 +55,8 @@
 
 use core::{cmp::Ordering, fmt, ops};
 pub use prefix::Prefix;
-use rand::{
-    distributions::{Distribution, Standard},
-    Rng,
-};
+pub use rand;
+use rand::distributions::{Distribution, Standard};
 use serde::{Deserialize, Serialize};
 use tiny_keccak::{Hasher, Sha3};
 
@@ -126,7 +124,7 @@ impl XorName {
     }
 
     /// Generate a random XorName
-    pub fn random<T: Rng>(rng: &mut T) -> Self {
+    pub fn random<T: rand::Rng>(rng: &mut T) -> Self {
         let mut xor = [0u8; XOR_NAME_LEN];
         rng.fill(&mut xor);
         Self(xor)
@@ -287,7 +285,7 @@ impl fmt::UpperHex for XorName {
 }
 
 impl Distribution<XorName> for Standard {
-    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> XorName {
+    fn sample<R: rand::Rng + ?Sized>(&self, rng: &mut R) -> XorName {
         let mut name = XorName::default();
         rng.fill(&mut name.0[..]);
         name
@@ -329,7 +327,7 @@ impl ops::Deref for XorName {
 mod tests {
     use super::*;
     use bincode::{deserialize, serialize};
-    use rand::{rngs::SmallRng, SeedableRng};
+    use rand::{rngs::SmallRng, Rng, SeedableRng};
 
     #[test]
     fn create_random_xorname() {
