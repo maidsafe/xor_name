@@ -57,7 +57,6 @@ use core::{cmp::Ordering, fmt, ops};
 pub use prefix::Prefix;
 pub use rand;
 use rand::distributions::{Distribution, Standard};
-use serde::{Deserialize, Serialize};
 use tiny_keccak::{Hasher, Sha3};
 
 /// Creates XorName with the given leading bytes and the rest filled with zeroes.
@@ -91,6 +90,8 @@ macro_rules! format {
 }
 
 mod prefix;
+#[cfg(feature = "serialize-hex")]
+mod serialize;
 
 /// Constant byte length of `XorName`.
 pub const XOR_NAME_LEN: usize = 32;
@@ -103,7 +104,11 @@ pub const XOR_NAME_LEN: usize = 32;
 /// i. e. the points with IDs `x` and `y` are considered to have distance `x xor y`.
 ///
 /// [1]: https://en.wikipedia.org/wiki/Kademlia#System_details
-#[derive(Eq, Copy, Clone, Default, Hash, Ord, PartialEq, PartialOrd, Serialize, Deserialize)]
+#[derive(Eq, Copy, Clone, Default, Hash, Ord, PartialEq, PartialOrd)]
+#[cfg_attr(
+    not(feature = "serialize-hex"),
+    derive(serde::Serialize, serde::Deserialize)
+)]
 pub struct XorName(pub [u8; XOR_NAME_LEN]);
 
 impl XorName {
