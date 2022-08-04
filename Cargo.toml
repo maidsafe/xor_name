@@ -1,6 +1,6 @@
 [package]
 name = "xor_name"
-version = "4.0.1"
+version = "4.1.0"
 authors = [ "MaidSafe Developers <dev@maidsafe.net>" ]
 description = "Xor Type"
 homepage = "http://maidsafe.net"
@@ -10,9 +10,8 @@ readme = "README.md"
 repository = "https://github.com/maidsafe/xor_name"
 
 [features]
-default = ["serialize-hex"]
-# Serialize `XorName` into a hex string if serializing into human-readable format
-serialize-hex = ["hex", "serde_test"]
+default = [ "serialize-hex" ]
+serialize-hex = [ "hex", "serde_test" ]
 
 [dependencies]
 rand_core = "0.6.3"
