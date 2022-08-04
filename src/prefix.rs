@@ -15,14 +15,17 @@ use core::{
     ops::RangeInclusive,
     str::FromStr,
 };
-use serde::{Deserialize, Serialize};
 
 /// A section prefix, i.e. a sequence of bits specifying the part of the network's name space
 /// consisting of all names that start with this sequence.
-#[derive(Clone, Copy, Default, Eq, Deserialize, Serialize)]
+#[derive(Clone, Copy, Default, Eq)]
+#[cfg_attr(
+    not(feature = "serialize-hex"),
+    derive(serde::Serialize, serde::Deserialize)
+)]
 pub struct Prefix {
-    bit_count: u16,
-    name: XorName,
+    pub(crate) bit_count: u16,
+    pub(crate) name: XorName,
 }
 
 impl Prefix {
