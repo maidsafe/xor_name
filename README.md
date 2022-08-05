@@ -7,7 +7,7 @@ XorName is an array that is useful for calculations in DHT
 
 ## Serialization
 
-`XorName` and `Prefix` can be serialized into a human-readable hex string, instead of as a `u8` array. To enable this, activate the `serialize-hex` feature. This also allows for these structures to be serialised when used as a key in a map like `HashMap`, because most formats only allow keys to be strings, instead of more complex types.
+`XorName` and `Prefix` are serialized into a human-readable hex string, instead of as a `u8` array. This is enabled by default, with the `serialize-hex` feature. This also allows for these structures to be serialised when used as a key in a map like `HashMap`, because most formats only allow keys to be strings, instead of more complex types.
 
 A struct like this:
 ```rust
@@ -21,8 +21,8 @@ struct MyStruct {
 Will yield this JSON
 ```json
 {
-  "prefix": "8a817b6d791f4b00000000000000000000000000000000000000000000000000/56",
-  "xor_name": "8a817b6d791f4bae4117ac7ae15a88cd2c62fba0b040972ce885f1a47625dea1"
+  "prefix": "10001101110001111100101000111001101101111101111010011001",
+  "xor_name": "8dc7ca39b7de990eb943fd64854776dd85aa82c33a4269693c57b36e0749ed8f"
 }
 ```
 
