@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.0.0](https://github.com/maidsafe/xor_name/compare/v4.1.0...v5.0.0) (2022-08-05)
+
+
+### ⚠ BREAKING CHANGES
+
+* error instead of panic on too long string
+
+### Features
+
+* different Prefix serialization format ([6ff6d39](https://github.com/maidsafe/xor_name/commit/6ff6d39400179f28580530fa3ee4bdb59db26876))
+* impl Display for Prefix ([d42ba53](https://github.com/maidsafe/xor_name/commit/d42ba5309329be2780fa4efab15532275f6b1bd9))
+
+
+### Bug Fixes
+
+* allow prefix strings of more than one byte ([1f05f48](https://github.com/maidsafe/xor_name/commit/1f05f4841a848667cca24fe08c22bde6a3a36d59))
+* error instead of panic on too long string ([73123cb](https://github.com/maidsafe/xor_name/commit/73123cbb0e2a23d30fc6298ad35812209dca27b5))
+
 ## [4.1.0](https://github.com/maidsafe/xor_name/compare/v4.0.1...v4.1.0) (2022-08-04)
 
 
