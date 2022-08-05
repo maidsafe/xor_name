@@ -4,7 +4,7 @@ use serde::{
     ser::SerializeStruct,
     Deserialize, Deserializer, Serialize, Serializer,
 };
-use std::fmt;
+use std::{fmt, str::FromStr};
 
 impl Serialize for XorName {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
@@ -61,11 +61,8 @@ impl Serialize for Prefix {
         S: Serializer,
     {
         if serializer.is_human_readable() {
-            let hex_str = hex::encode(&self.name);
-            let bit_count = self.bit_count;
-            let s = std::format!("{hex_str}/{bit_count}");
-
-            return serializer.serialize_str(&s);
+            // Use `Display` impl from `Prefix`
+            return serializer.serialize_str(&std::format!("{}", self));
         }
 
         let mut s = serializer.serialize_struct("Prefix", 2)?;
@@ -85,32 +82,16 @@ impl<'de> Deserialize<'de> for Prefix {
                 type Value = Prefix;
 
                 fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                    write!(
-                        formatter,
-                        "prefix in string format (\"<xor hex string>/<prefix>\")"
-                    )
+                    write!(formatter, "binary formatted string")
                 }
 
                 fn visit_str<E>(self, s: &str) -> Result<Self::Value, E>
                 where
                     E: de::Error,
                 {
-                    let mut split = s.split('/');
-
-                    let hex_str = split
-                        .next()
-                        .ok_or_else(|| de::Error::custom("`str::split` logic error"))?;
-                    let bit_count = split
-                        .next()
-                        .ok_or_else(|| de::Error::custom("no `/` symbol encountered"))?;
-
-                    let k: [u8; 32] = hex::FromHex::from_hex(hex_str)
-                        .map_err(|_| de::Error::custom("invalid 32 byte hex string"))?;
-                    let bit_count = bit_count
-                        .parse::<usize>()
-                        .map_err(|_e| de::Error::custom("bit_count is not a valid `usize`"))?;
-
-                    Ok(Prefix::new(bit_count, XorName(k)))
+                    Prefix::from_str(s).map_err(|e| {
+                        E::custom(std::format!("could not convert string to `Prefix`: {e}"))
+                    })
                 }
             }
             return deserializer.deserialize_str(PrefixVisitor);
@@ -161,23 +142,26 @@ mod test {
 
     #[test]
     fn prefix_ser_de() {
+        let bit_count = 15;
         let prefix = Prefix {
-            bit_count: 14,
+            bit_count,
             name: XorName([0xAA; 32]),
         };
         let prefix_derived = PrefixDerived {
-            bit_count: 14,
+            bit_count,
             name: XorNameDerived([0xAA; 32]),
         };
 
-        let xor_hex_str = static_str("aa".repeat(32) + "/14");
-        assert_tokens(&prefix.readable(), &[Token::Str(xor_hex_str)]);
+        assert_tokens(&prefix.readable(), &[Token::Str("101010101010101")]);
 
-        assert_tokens(&prefix.compact(), &prefix_tokens("Prefix", "XorName"));
+        assert_tokens(
+            &prefix.compact(),
+            &prefix_tokens(bit_count, "Prefix", "XorName"),
+        );
         // Verify our `Serialize` impl is same as when it would be derived
         assert_tokens(
             &prefix_derived.compact(),
-            &prefix_tokens("PrefixDerived", "XorNameDerived"),
+            &prefix_tokens(bit_count, "PrefixDerived", "XorNameDerived"),
         );
     }
 
@@ -196,11 +180,11 @@ mod test {
     }
 
     // Compact/derived representation of `Prefix`
-    fn prefix_tokens(name: &'static str, name2: &'static str) -> Vec<Token> {
+    fn prefix_tokens(bit_count: u16, name: &'static str, name2: &'static str) -> Vec<Token> {
         let mut v = vec![
             Token::Struct { name, len: 2 },
             Token::Str("bit_count"),
-            Token::U16(14),
+            Token::U16(bit_count),
             Token::Str("name"),
         ];
         v.extend_from_slice(&xor_tokens(name2));
