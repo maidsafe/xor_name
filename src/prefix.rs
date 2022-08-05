@@ -284,17 +284,25 @@ impl Debug for Prefix {
 }
 
 #[derive(Debug)]
-pub struct FromStrError {
-    pub invalid_char: char,
+pub enum FromStrError {
+    InvalidChar(char),
+    TooLong(usize),
 }
 
 impl Display for FromStrError {
-    fn fmt(&self, formatter: &mut Formatter) -> FmtResult {
+    fn fmt(&self, f: &mut Formatter) -> FmtResult {
+        match self {
+            FromStrError::InvalidChar(c) => {
+                write!(f, "expected `0` or `1`, but encountered `{}`", c)
+            }
+            FromStrError::TooLong(l) => {
         write!(
-            formatter,
-            "'{}' not allowed - the string must represent a binary number.",
-            self.invalid_char
+                    f,
+                    "max length exceeded {} with length of {l}",
+                    XOR_NAME_LEN * 8
         )
+            }
+        }
     }
 }
 
@@ -302,13 +310,16 @@ impl FromStr for Prefix {
     type Err = FromStrError;
 
     fn from_str(bits: &str) -> Result<Self, Self::Err> {
+        if bits.len() > XOR_NAME_LEN * 8 {
+            return Err(FromStrError::TooLong(bits.len()));
+        }
         let mut name = [0; XOR_NAME_LEN];
         for (i, bit) in bits.chars().enumerate() {
             if bit == '1' {
                 let byte = i / 8;
                 name[byte] |= 1 << (7 - (i % 8));
             } else if bit != '0' {
-                return Err(FromStrError { invalid_char: bit });
+                return Err(FromStrError::InvalidChar(bit));
             }
         }
         Ok(Self::new(bits.len(), XorName(name)))
@@ -432,6 +443,9 @@ mod tests {
         assert_eq!(&format!(2, "{:b}", parse("10")), "10");
         assert_eq!(&format!(2, "{:b}", parse("11")), "11");
         assert_eq!(&format!(7, "{:b}", parse("1100101")), "1100101");
+
+        // Bit string with 257 width
+        assert!(Prefix::from_str(&"1".repeat(XOR_NAME_LEN * 8 + 1)).is_err());
     }
 
     fn parse(input: &str) -> Prefix {
