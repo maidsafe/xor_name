@@ -306,7 +306,7 @@ impl FromStr for Prefix {
         for (i, bit) in bits.chars().enumerate() {
             if bit == '1' {
                 let byte = i / 8;
-                name[byte] |= 1 << (7 - i);
+                name[byte] |= 1 << (7 - (i % 8));
             } else if bit != '0' {
                 return Err(FromStrError { invalid_char: bit });
             }
