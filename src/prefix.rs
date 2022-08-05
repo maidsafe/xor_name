@@ -283,6 +283,14 @@ impl Debug for Prefix {
     }
 }
 
+/// Format `Prefix` as bit string, e.g. `"010"` with a [`Prefix::bit_count`] of `3`.
+impl Display for Prefix {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        // Use `Binary` impl from `XorName` with restricted width
+        write!(f, "{:width$b}", self.name, width = self.bit_count as usize)
+    }
+}
+
 #[derive(Debug)]
 pub enum FromStrError {
     InvalidChar(char),
@@ -296,11 +304,11 @@ impl Display for FromStrError {
                 write!(f, "expected `0` or `1`, but encountered `{}`", c)
             }
             FromStrError::TooLong(l) => {
-        write!(
+                write!(
                     f,
                     "max length exceeded {} with length of {l}",
                     XOR_NAME_LEN * 8
-        )
+                )
             }
         }
     }
@@ -446,6 +454,16 @@ mod tests {
 
         // Bit string with 257 width
         assert!(Prefix::from_str(&"1".repeat(XOR_NAME_LEN * 8 + 1)).is_err());
+    }
+
+    #[test]
+    fn format_parse_roundtrip() {
+        let format_parse_eq = |p| p == parse(&std::format!("{}", p));
+
+        assert!(format_parse_eq(Prefix::new(0, XorName([0xBB; 32]))));
+        assert!(format_parse_eq(Prefix::new(256, XorName([0x33; 32]))));
+        assert!(format_parse_eq(Prefix::new(5, XorName([0xAA; 32]))));
+        assert!(format_parse_eq(Prefix::new(76, XorName([0xAA; 32]))));
     }
 
     fn parse(input: &str) -> Prefix {
