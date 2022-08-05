@@ -199,29 +199,13 @@
 <span id="192">192</span>
 <span id="193">193</span>
 <span id="194">194</span>
-<span id="195">195</span>
-<span id="196">196</span>
-<span id="197">197</span>
-<span id="198">198</span>
-<span id="199">199</span>
-<span id="200">200</span>
-<span id="201">201</span>
-<span id="202">202</span>
-<span id="203">203</span>
-<span id="204">204</span>
-<span id="205">205</span>
-<span id="206">206</span>
-<span id="207">207</span>
-<span id="208">208</span>
-<span id="209">209</span>
-<span id="210">210</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">Prefix</span>, <span class="ident">XorName</span>};
 <span class="kw">use</span> <span class="ident">serde</span>::{
     <span class="ident">de</span>::{<span class="self">self</span>, <span class="ident">Visitor</span>},
     <span class="ident">ser::SerializeStruct</span>,
     <span class="ident">Deserialize</span>, <span class="ident">Deserializer</span>, <span class="ident">Serialize</span>, <span class="ident">Serializer</span>,
 };
-<span class="kw">use</span> <span class="ident">std::fmt</span>;
+<span class="kw">use</span> <span class="ident">std</span>::{<span class="ident">fmt</span>, <span class="ident">str::FromStr</span>};
 
 <span class="kw">impl</span> <span class="ident">Serialize</span> <span class="kw">for</span> <span class="ident">XorName</span> {
     <span class="kw">fn</span> <span class="ident">serialize</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">serializer</span>: <span class="ident">S</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">S::Ok</span>, <span class="ident">S::Error</span><span class="op">&gt;</span>
@@ -278,11 +262,8 @@
         <span class="ident">S</span>: <span class="ident">Serializer</span>,
     {
         <span class="kw">if</span> <span class="ident">serializer</span>.<span class="ident">is_human_readable</span>() {
-            <span class="kw">let</span> <span class="ident">hex_str</span> <span class="op">=</span> <span class="ident">hex::encode</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">name</span>);
-            <span class="kw">let</span> <span class="ident">bit_count</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">bit_count</span>;
-            <span class="kw">let</span> <span class="ident">s</span> <span class="op">=</span> <span class="macro">std::format!</span>(<span class="string">&quot;{hex_str}/{bit_count}&quot;</span>);
-
-            <span class="kw">return</span> <span class="ident">serializer</span>.<span class="ident">serialize_str</span>(<span class="kw-2">&amp;</span><span class="ident">s</span>);
+            <span class="comment">// Use `Display` impl from `Prefix`</span>
+            <span class="kw">return</span> <span class="ident">serializer</span>.<span class="ident">serialize_str</span>(<span class="kw-2">&amp;</span><span class="macro">std::format!</span>(<span class="string">&quot;{}&quot;</span>, <span class="self">self</span>));
         }
 
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">serializer</span>.<span class="ident">serialize_struct</span>(<span class="string">&quot;Prefix&quot;</span>, <span class="number">2</span>)<span class="question-mark">?</span>;
@@ -302,32 +283,16 @@
                 <span class="kw">type</span> <span class="ident">Value</span> <span class="op">=</span> <span class="ident">Prefix</span>;
 
                 <span class="kw">fn</span> <span class="ident">expecting</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">formatter</span>: <span class="kw-2">&amp;mut</span> <span class="ident">fmt::Formatter</span>) -&gt; <span class="ident">fmt::Result</span> {
-                    <span class="macro">write!</span>(
-                        <span class="ident">formatter</span>,
-                        <span class="string">&quot;prefix in string format (\&quot;&lt;xor hex string&gt;/&lt;prefix&gt;\&quot;)&quot;</span>
-                    )
+                    <span class="macro">write!</span>(<span class="ident">formatter</span>, <span class="string">&quot;binary formatted string&quot;</span>)
                 }
 
                 <span class="kw">fn</span> <span class="ident">visit_str</span><span class="op">&lt;</span><span class="ident">E</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Value</span>, <span class="ident">E</span><span class="op">&gt;</span>
                 <span class="kw">where</span>
                     <span class="ident">E</span>: <span class="ident">de::Error</span>,
                 {
-                    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">split</span> <span class="op">=</span> <span class="ident">s</span>.<span class="ident">split</span>(<span class="string">&#39;/&#39;</span>);
-
-                    <span class="kw">let</span> <span class="ident">hex_str</span> <span class="op">=</span> <span class="ident">split</span>
-                        .<span class="ident">next</span>()
-                        .<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">de::Error::custom</span>(<span class="string">&quot;`str::split` logic error&quot;</span>))<span class="question-mark">?</span>;
-                    <span class="kw">let</span> <span class="ident">bit_count</span> <span class="op">=</span> <span class="ident">split</span>
-                        .<span class="ident">next</span>()
-                        .<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">de::Error::custom</span>(<span class="string">&quot;no `/` symbol encountered&quot;</span>))<span class="question-mark">?</span>;
-
-                    <span class="kw">let</span> <span class="ident">k</span>: [<span class="ident">u8</span>; <span class="number">32</span>] <span class="op">=</span> <span class="ident">hex::FromHex::from_hex</span>(<span class="ident">hex_str</span>)
-                        .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">de::Error::custom</span>(<span class="string">&quot;invalid 32 byte hex string&quot;</span>))<span class="question-mark">?</span>;
-                    <span class="kw">let</span> <span class="ident">bit_count</span> <span class="op">=</span> <span class="ident">bit_count</span>
-                        .<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>()
-                        .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">_e</span><span class="op">|</span> <span class="ident">de::Error::custom</span>(<span class="string">&quot;bit_count is not a valid `usize`&quot;</span>))<span class="question-mark">?</span>;
-
-                    <span class="prelude-val">Ok</span>(<span class="ident">Prefix::new</span>(<span class="ident">bit_count</span>, <span class="ident">XorName</span>(<span class="ident">k</span>)))
+                    <span class="ident">Prefix::from_str</span>(<span class="ident">s</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> {
+                        <span class="ident">E::custom</span>(<span class="macro">std::format!</span>(<span class="string">&quot;could not convert string to `Prefix`: {e}&quot;</span>))
+                    })
                 }
             }
             <span class="kw">return</span> <span class="ident">deserializer</span>.<span class="ident">deserialize_str</span>(<span class="ident">PrefixVisitor</span>);
@@ -378,23 +343,26 @@
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">prefix_ser_de</span>() {
+        <span class="kw">let</span> <span class="ident">bit_count</span> <span class="op">=</span> <span class="number">15</span>;
         <span class="kw">let</span> <span class="ident">prefix</span> <span class="op">=</span> <span class="ident">Prefix</span> {
-            <span class="ident">bit_count</span>: <span class="number">14</span>,
+            <span class="ident">bit_count</span>,
             <span class="ident">name</span>: <span class="ident">XorName</span>([<span class="number">0xAA</span>; <span class="number">32</span>]),
         };
         <span class="kw">let</span> <span class="ident">prefix_derived</span> <span class="op">=</span> <span class="ident">PrefixDerived</span> {
-            <span class="ident">bit_count</span>: <span class="number">14</span>,
+            <span class="ident">bit_count</span>,
             <span class="ident">name</span>: <span class="ident">XorNameDerived</span>([<span class="number">0xAA</span>; <span class="number">32</span>]),
         };
 
-        <span class="kw">let</span> <span class="ident">xor_hex_str</span> <span class="op">=</span> <span class="ident">static_str</span>(<span class="string">&quot;aa&quot;</span>.<span class="ident">repeat</span>(<span class="number">32</span>) <span class="op">+</span> <span class="string">&quot;/14&quot;</span>);
-        <span class="ident">assert_tokens</span>(<span class="kw-2">&amp;</span><span class="ident">prefix</span>.<span class="ident">readable</span>(), <span class="kw-2">&amp;</span>[<span class="ident">Token::Str</span>(<span class="ident">xor_hex_str</span>)]);
+        <span class="ident">assert_tokens</span>(<span class="kw-2">&amp;</span><span class="ident">prefix</span>.<span class="ident">readable</span>(), <span class="kw-2">&amp;</span>[<span class="ident">Token::Str</span>(<span class="string">&quot;101010101010101&quot;</span>)]);
 
-        <span class="ident">assert_tokens</span>(<span class="kw-2">&amp;</span><span class="ident">prefix</span>.<span class="ident">compact</span>(), <span class="kw-2">&amp;</span><span class="ident">prefix_tokens</span>(<span class="string">&quot;Prefix&quot;</span>, <span class="string">&quot;XorName&quot;</span>));
+        <span class="ident">assert_tokens</span>(
+            <span class="kw-2">&amp;</span><span class="ident">prefix</span>.<span class="ident">compact</span>(),
+            <span class="kw-2">&amp;</span><span class="ident">prefix_tokens</span>(<span class="ident">bit_count</span>, <span class="string">&quot;Prefix&quot;</span>, <span class="string">&quot;XorName&quot;</span>),
+        );
         <span class="comment">// Verify our `Serialize` impl is same as when it would be derived</span>
         <span class="ident">assert_tokens</span>(
             <span class="kw-2">&amp;</span><span class="ident">prefix_derived</span>.<span class="ident">compact</span>(),
-            <span class="kw-2">&amp;</span><span class="ident">prefix_tokens</span>(<span class="string">&quot;PrefixDerived&quot;</span>, <span class="string">&quot;XorNameDerived&quot;</span>),
+            <span class="kw-2">&amp;</span><span class="ident">prefix_tokens</span>(<span class="ident">bit_count</span>, <span class="string">&quot;PrefixDerived&quot;</span>, <span class="string">&quot;XorNameDerived&quot;</span>),
         );
     }
 
@@ -413,11 +381,11 @@
     }
 
     <span class="comment">// Compact/derived representation of `Prefix`</span>
-    <span class="kw">fn</span> <span class="ident">prefix_tokens</span>(<span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>, <span class="ident">name2</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Token</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">prefix_tokens</span>(<span class="ident">bit_count</span>: <span class="ident">u16</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>, <span class="ident">name2</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Token</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">v</span> <span class="op">=</span> <span class="macro">vec!</span>[
             <span class="ident">Token::Struct</span> { <span class="ident">name</span>, <span class="ident">len</span>: <span class="number">2</span> },
             <span class="ident">Token::Str</span>(<span class="string">&quot;bit_count&quot;</span>),
-            <span class="ident">Token::U16</span>(<span class="number">14</span>),
+            <span class="ident">Token::U16</span>(<span class="ident">bit_count</span>),
             <span class="ident">Token::Str</span>(<span class="string">&quot;name&quot;</span>),
         ];
         <span class="ident">v</span>.<span class="ident">extend_from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">xor_tokens</span>(<span class="ident">name2</span>));
