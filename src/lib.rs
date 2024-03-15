@@ -114,14 +114,14 @@ pub struct XorName(pub [u8; XOR_NAME_LEN]);
 impl XorName {
     /// Generate a XorName for the given content.
     pub fn from_content(content: &[u8]) -> Self {
-        Self::from_content_parts(&[content])
+        Self::from_content_parts(vec![content.to_vec()])
     }
 
     /// Generate a XorName for the given content (for content-addressable-storage)
-    pub fn from_content_parts(content_parts: &[&[u8]]) -> Self {
+    pub fn from_content_parts(content_parts: Vec<Vec<u8>>) -> Self {
         let mut sha3 = Sha3::v256();
         for part in content_parts {
-            sha3.update(part);
+            sha3.update(&part);
         }
         let mut hash = [0u8; XOR_NAME_LEN];
         sha3.finalize(&mut hash);
