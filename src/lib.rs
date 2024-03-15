@@ -662,8 +662,8 @@ mod tests {
 
     #[test]
     fn xor_name_from_content() {
-        let alpha_1 = XorName::from_content_parts(&[b"abcdefg", b"hijk"]);
-        let alpha_2 = XorName::from_content_parts(&[b"abcdefg", b"hijk"]);
+        let alpha_1 = XorName::from_content_parts(vec![b"abcdefg".to_vec(), b"hijk".to_vec()]);
+        let alpha_2 = XorName::from_content_parts(vec![b"abcdefg".to_vec(), b"hijk".to_vec()]);
         let alpha_3 = XorName::from_content(b"abcdefg");
 
         assert_eq!(alpha_1, alpha_2);
@@ -672,7 +672,7 @@ mod tests {
 
     #[test]
     fn xor_name_from_content_is_agnostic_to_where_content_parts_splits() {
-        let alpha_1 = XorName::from_content_parts(&[b"abcdefg", b"hijk"]);
+        let alpha_1 = XorName::from_content_parts(vec![b"abcdefg".to_vec(), b"hijk".to_vec()]);
         let alpha_2 = XorName::from_content(b"abcdefghijk");
         assert_eq!(alpha_1, alpha_2);
     }
